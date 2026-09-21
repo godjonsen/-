@@ -1,0 +1,1955 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090c11">
+  <title>군도 세금 분배 장부</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090c11;
+      --surface: #11161e;
+      --surface-2: #141922;
+      --surface-3: #0c1016;
+      --line: rgba(255,255,255,.09);
+      --line-strong: rgba(255,255,255,.16);
+      --text: #f4f7fb;
+      --muted: #9ca3af;
+      --faint: #626b79;
+      --sky: #38bdf8;
+      --sky-soft: rgba(56,189,248,.13);
+      --amber: #fbbf24;
+      --amber-soft: rgba(251,191,36,.13);
+      --rose: #fb7185;
+      --red: #f87171;
+      --green: #34d399;
+      --violet: #a78bfa;
+      --radius: 14px;
+      --shadow: 0 16px 44px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 78% -10%, rgba(56,189,248,.08), transparent 34rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    button, input, select, textarea { font: inherit; }
+    button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+    button:disabled { cursor: not-allowed; opacity: .42; }
+    a { color: inherit; text-decoration: none; }
+    svg { display: block; width: 1.1em; height: 1.1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .hidden { display: none !important; }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--line);
+      background: rgba(13,17,24,.94);
+      backdrop-filter: blur(14px);
+    }
+    .header-inner, .page {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .header-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .brand {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(56,189,248,.28);
+      border-radius: 13px;
+      color: #7dd3fc;
+      background: rgba(56,189,248,.1);
+      box-shadow: inset 0 0 28px rgba(56,189,248,.08), 0 0 26px rgba(56,189,248,.07);
+    }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .brand-copy { min-width: 0; }
+    .brand-title-row { display: flex; align-items: center; gap: 7px; min-width: 0; }
+    .alliance-title {
+      margin: 0;
+      overflow: hidden;
+      color: #fff;
+      font-size: 1.24rem;
+      font-weight: 900;
+      letter-spacing: -.03em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .brand-subtitle { margin: 1px 0 0; color: var(--faint); font-size: .78rem; }
+    .edit-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 30px;
+      padding: 4px 8px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--muted);
+      background: transparent;
+      font-size: .76rem;
+      font-weight: 700;
+    }
+    .edit-name:hover { border-color: rgba(56,189,248,.35); color: #bae6fd; background: var(--sky-soft); }
+    .edit-name svg { width: 13px; height: 13px; }
+    .creator-link {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      min-height: 40px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 11px;
+      color: #d4d4d8;
+      background: rgba(255,255,255,.025);
+      font-size: .83rem;
+      font-weight: 700;
+      transition: .18s ease;
+    }
+    .creator-link:hover { border-color: rgba(248,113,113,.38); color: #fff; background: rgba(239,68,68,.08); transform: translateY(-1px); }
+    .youtube-mark {
+      display: grid;
+      width: 26px;
+      height: 19px;
+      place-items: center;
+      border-radius: 6px;
+      color: #fff;
+      background: #ff0033;
+      box-shadow: 0 0 16px rgba(255,0,51,.23);
+    }
+    .youtube-mark svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+
+    .page { padding: 26px 0 54px; }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+    }
+    .summary-card {
+      min-width: 0;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 19px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(255,255,255,.025), transparent 46%), rgba(20,25,34,.92);
+    }
+    .summary-label { margin: 0; color: #a1a1aa; font-size: .88rem; }
+    .summary-value { margin: 7px 0 0; overflow: hidden; color: #fff; font-size: 1.46rem; font-weight: 900; letter-spacing: -.035em; text-overflow: ellipsis; white-space: nowrap; }
+    .summary-sub { margin: 2px 0 0; color: #646c79; font-size: .76rem; }
+    .summary-icon {
+      width: 43px;
+      height: 43px;
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+    }
+    .summary-icon svg { width: 20px; height: 20px; }
+    .violet { color: #c4b5fd; background: rgba(139,92,246,.13); }
+    .amber { color: #fcd34d; background: var(--amber-soft); }
+    .sky { color: #7dd3fc; background: var(--sky-soft); }
+    .rose { color: #fda4af; background: rgba(244,63,94,.12); }
+
+    .workspace { margin-top: 22px; }
+    .workspace-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    .tabs {
+      min-width: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      overflow: visible;
+      padding: 4px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface);
+      scrollbar-width: thin;
+    }
+    .tab-btn {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      min-height: 42px;
+      padding: 9px 14px;
+      border: 0;
+      border-radius: 9px;
+      color: #9ca3af;
+      background: transparent;
+      font-size: .88rem;
+      font-weight: 800;
+    }
+    .tab-btn:hover { color: #e4e4e7; background: rgba(255,255,255,.035); }
+    .tab-btn.active { color: #bae6fd; background: rgba(56,189,248,.14); box-shadow: inset 0 0 0 1px rgba(56,189,248,.07); }
+    .tab-btn svg { width: 16px; height: 16px; }
+    .tab-btn[data-tab="output"] { border: 1px solid rgba(56,189,248,.22); color: #bae6fd; }
+    .tab-btn[data-tab="output"].active { border-color: rgba(56,189,248,.46); }
+    .tab-tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 19px;
+      padding: 1px 5px;
+      border-radius: 5px;
+      color: #071018;
+      background: #7dd3fc;
+      font-size: .62rem;
+      font-weight: 900;
+      letter-spacing: .03em;
+    }
+    .quick-actions { flex: 0 0 auto; display: flex; gap: 8px; }
+
+    .btn {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 8px 13px;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: #e4e4e7;
+      background: #1a212c;
+      font-weight: 800;
+      font-size: .88rem;
+      transition: .16s ease;
+    }
+    .btn:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-primary { color: #06131b; background: var(--sky); }
+    .btn-amber { color: #171006; background: var(--amber); }
+    .btn-complete { border-color: rgba(251,191,36,.34); color: #fde68a; background: rgba(251,191,36,.09); }
+    .btn-complete:hover:not(:disabled) { border-color: rgba(251,191,36,.55); background: rgba(251,191,36,.15); }
+    .btn-outline { border-color: var(--line); color: #d4d4d8; background: var(--surface-2); }
+    .btn-ghost { color: #a1a1aa; background: transparent; }
+    .btn-ghost:hover:not(:disabled) { color: #fff; background: rgba(255,255,255,.05); }
+    .btn-danger { color: #fecaca; background: rgba(239,68,68,.13); border-color: rgba(248,113,113,.24); }
+    .btn-small { min-height: 34px; padding: 6px 9px; border-radius: 8px; font-size: .8rem; }
+    .icon-btn { width: 36px; min-height: 36px; padding: 0; }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 17px 19px;
+      border-bottom: 1px solid var(--line);
+    }
+    .panel-title { margin: 0; color: #fff; font-size: 1rem; font-weight: 900; }
+    .panel-desc { margin: 3px 0 0; color: var(--faint); font-size: .83rem; }
+    .panel-tools { display: flex; align-items: center; gap: 8px; }
+    #panel-history .panel-tools > .btn {
+      width: 172px;
+      height: 42px;
+      min-height: 42px;
+      flex: 0 0 172px;
+      padding: 0 14px;
+      line-height: 1;
+      text-align: center;
+      white-space: nowrap;
+    }
+    #panel-history .panel-tools > .btn svg {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      margin: 0;
+    }
+    .field, .select, .textarea {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      outline: none;
+      color: #f4f4f5;
+      background: var(--surface-3);
+    }
+    .field, .select { padding: 8px 11px; }
+    .textarea { min-height: 88px; padding: 10px 11px; resize: vertical; }
+    .field:focus, .select:focus, .textarea:focus { border-color: rgba(56,189,248,.58); box-shadow: 0 0 0 3px rgba(56,189,248,.09); }
+    .field::placeholder, .textarea::placeholder { color: #535b68; }
+    .search-wrap { position: relative; min-width: 210px; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; width: 16px; height: 16px; color: #596270; transform: translateY(-50%); }
+    .search-wrap .field { padding-left: 35px; }
+
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 13px 12px; border-bottom: 1px solid rgba(255,255,255,.065); text-align: left; white-space: nowrap; }
+    th { color: #717b89; font-size: .79rem; font-weight: 800; }
+    td { color: #e4e4e7; font-size: .88rem; }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: rgba(255,255,255,.026); }
+    .complete-row { background: rgba(239,68,68,.055); }
+    .right { text-align: right; }
+    .sort-btn { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; color: inherit; background: transparent; font-size: inherit; font-weight: inherit; }
+    .sort-btn:hover { color: #fff; }
+    .member-name-btn { padding: 0; border: 0; color: #fff; background: transparent; font-weight: 900; }
+    .member-name-btn:hover { color: #7dd3fc; }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      min-height: 25px;
+      padding: 3px 8px;
+      border: 1px solid;
+      border-radius: 999px;
+      font-size: .74rem;
+      font-weight: 800;
+    }
+    .badge-complete { border-color: rgba(248,113,113,.35); color: #fca5a5; background: rgba(239,68,68,.12); }
+    .badge-excluded { border-color: #3f3f46; color: #d4d4d8; background: #27272a; }
+    .badge-waiting { border-color: rgba(251,191,36,.28); color: #fcd34d; background: rgba(251,191,36,.1); }
+    .badge-progress { border-color: rgba(56,189,248,.32); color: #7dd3fc; background: rgba(56,189,248,.1); }
+    .badge-muted { border-color: #30343b; color: #707886; background: #111318; }
+    .progress-track { width: 110px; height: 6px; overflow: hidden; border-radius: 999px; background: rgba(255,255,255,.08); }
+    .progress-bar { height: 100%; border-radius: inherit; background: var(--sky); }
+    .quick-cell { display: flex; justify-content: flex-end; gap: 3px; }
+    .money-sky { color: #7dd3fc; }
+    .money-amber { color: #fde68a; }
+    .money-red { color: #fca5a5; }
+    .difference-cell { min-width: 112px; display: inline-flex; align-items: flex-end; flex-direction: column; gap: 2px; }
+    .difference-line { font-size: .73rem; font-weight: 800; white-space: nowrap; }
+    .difference-line.pending { color: #fcd34d; }
+    .difference-line.transfer { color: #fca5a5; }
+    .difference-line.zero, .difference-line.empty { color: #68717e; }
+    .mobile-difference { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 9px; padding: 9px 10px; border: 1px solid rgba(255,255,255,.06); border-radius: 8px; background: rgba(255,255,255,.02); }
+    .mobile-difference > span { color: #737c89; font-size: .72rem; font-weight: 800; }
+    .mobile-difference .difference-cell { min-width: 0; align-items: flex-end; }
+    .mobile-list { display: none; }
+
+    .empty {
+      padding: 62px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+    .empty-mark {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 13px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: #6b7280;
+      background: rgba(255,255,255,.025);
+    }
+    .empty-mark svg { width: 22px; height: 22px; }
+    .empty strong { display: block; margin-bottom: 4px; color: #d4d4d8; }
+    .empty p { margin: 0 0 16px; font-size: .85rem; }
+
+    .history-list, .member-list { display: grid; }
+    .history-item, .member-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 15px 19px;
+      border-bottom: 1px solid rgba(255,255,255,.065);
+    }
+    .history-item:last-child, .member-item:last-child { border-bottom: 0; }
+    .history-main { min-width: 0; display: flex; align-items: flex-start; gap: 11px; }
+    .history-icon { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 10px; }
+    .history-icon svg { width: 17px; height: 17px; }
+    .history-copy { min-width: 0; }
+    .history-title { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; font-weight: 900; }
+    .history-meta { margin-top: 3px; color: #8b93a0; font-size: .8rem; }
+    .history-note { max-width: 600px; overflow: hidden; margin-top: 2px; color: #5f6875; font-size: .77rem; text-overflow: ellipsis; white-space: nowrap; }
+    .history-side { display: flex; align-items: center; gap: 8px; }
+    .history-amount { font-size: 1rem; font-weight: 900; }
+    .item-actions { display: flex; align-items: center; gap: 2px; }
+    .member-copy { min-width: 0; }
+    .member-title { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .member-note { margin: 4px 0 0; color: #707886; font-size: .82rem; }
+    .member-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 7px; }
+    .switch-label { display: inline-flex; align-items: center; gap: 8px; color: #a1a1aa; font-size: .83rem; }
+    .switch-input { width: 36px; height: 20px; accent-color: var(--sky); }
+    .inactive { opacity: .53; }
+
+    .ranking-upload {
+      display: grid;
+      grid-template-columns: 180px minmax(220px,1fr) auto;
+      gap: 10px;
+      padding: 17px 19px;
+      border-bottom: 1px solid var(--line);
+      align-items: end;
+    }
+    .form-label { display: block; margin-bottom: 6px; color: #c4c9d1; font-size: .82rem; font-weight: 800; }
+    .upload-field {
+      position: relative;
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border: 1px dashed rgba(56,189,248,.35);
+      border-radius: 10px;
+      color: #bae6fd;
+      background: rgba(56,189,248,.08);
+      font-size: .86rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+    .upload-field:hover { background: rgba(56,189,248,.13); }
+    .upload-field input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .ranking-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+      padding: 18px;
+    }
+    .ranking-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: var(--surface-2);
+    }
+    .ranking-image-btn {
+      width: 100%;
+      display: block;
+      padding: 0;
+      border: 0;
+      background: #07090d;
+      aspect-ratio: 16 / 10;
+    }
+    .ranking-image-btn img { width: 100%; height: 100%; display: block; object-fit: contain; }
+    .ranking-info { padding: 13px; }
+    .ranking-date { color: #7dd3fc; font-size: .76rem; font-weight: 800; }
+    .ranking-name { margin: 4px 0 0; overflow: hidden; color: #fff; font-weight: 900; text-overflow: ellipsis; white-space: nowrap; }
+    .ranking-note { min-height: 20px; margin: 4px 0 0; color: #747d89; font-size: .8rem; }
+    .ranking-actions { display: flex; justify-content: flex-end; gap: 4px; margin-top: 10px; }
+
+    .manual-wrap { padding: 20px; }
+    .manual-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+    .manual-card {
+      padding: 17px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+    }
+    .manual-number {
+      width: 29px;
+      height: 29px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 10px;
+      border-radius: 9px;
+      color: #bae6fd;
+      background: var(--sky-soft);
+      font-size: .8rem;
+      font-weight: 900;
+    }
+    .manual-card h3 { margin: 0; font-size: .95rem; }
+    .manual-card p { margin: 6px 0 0; color: #929aa7; font-size: .84rem; }
+    .limit-table { margin-top: 10px; }
+    .limit-row { display: flex; justify-content: space-between; gap: 14px; padding: 7px 0; border-top: 1px solid rgba(255,255,255,.065); color: #aab0ba; font-size: .81rem; }
+    .limit-row strong { color: #e5e7eb; }
+    .data-tools {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .notice {
+      margin-top: 14px;
+      padding: 13px 15px;
+      border: 1px solid rgba(251,191,36,.19);
+      border-radius: 11px;
+      color: #d6c796;
+      background: rgba(251,191,36,.06);
+      font-size: .82rem;
+    }
+    .report-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 17px 19px;
+      border-bottom: 1px solid var(--line);
+    }
+    .report-info { min-width: 0; }
+    .report-info strong { display: block; color: #fff; font-size: .92rem; }
+    .report-info span { display: block; margin-top: 3px; color: #737c89; font-size: .8rem; }
+    .report-buttons { flex: 0 0 auto; display: flex; gap: 8px; }
+    .report-preview {
+      max-height: 72vh;
+      overflow: auto;
+      padding: 18px;
+      background:
+        linear-gradient(45deg, rgba(255,255,255,.018) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.018) 75%),
+        linear-gradient(45deg, rgba(255,255,255,.018) 25%, transparent 25%, transparent 75%, rgba(255,255,255,.018) 75%),
+        #080b10;
+      background-position: 0 0, 10px 10px;
+      background-size: 20px 20px;
+    }
+    .report-canvas {
+      width: 100%;
+      min-width: 720px;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 9px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.32);
+    }
+
+    dialog {
+      width: min(560px, calc(100% - 28px));
+      max-height: calc(100vh - 34px);
+      overflow-y: auto;
+      padding: 0;
+      border: 1px solid rgba(255,255,255,.13);
+      border-radius: 16px;
+      color: var(--text);
+      background: var(--surface-2);
+      box-shadow: var(--shadow);
+    }
+    dialog::backdrop { background: rgba(0,0,0,.68); backdrop-filter: blur(4px); }
+    .dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 19px 20px 14px; }
+    .dialog-title { margin: 0; color: #fff; font-size: 1.07rem; font-weight: 900; }
+    .dialog-desc { margin: 4px 0 0; color: #848d9a; font-size: .81rem; }
+    .dialog-close { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 9px; color: #8a93a0; background: transparent; }
+    .dialog-close:hover { color: #fff; background: rgba(255,255,255,.06); }
+    .dialog-close svg { width: 18px; height: 18px; }
+    .dialog-body { display: grid; gap: 14px; padding: 4px 20px 18px; }
+    .dialog-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 20px 19px; border-top: 1px solid var(--line); }
+    #distribution-dialog .dialog-foot { flex-wrap: wrap; }
+    .form-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .check-row { display: flex; align-items: center; gap: 8px; color: #b4bac3; font-size: .86rem; }
+    .check-row input { width: 18px; height: 18px; accent-color: var(--sky); }
+    .pouch-stack { display: grid; gap: 10px; }
+    .pouch-card { padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-3); }
+    .pouch-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .pouch-title { color: #fff; font-size: .86rem; font-weight: 900; }
+    .pouch-meta { margin-top: 3px; color: #626b78; font-size: .73rem; }
+    .stepper { display: flex; align-items: center; gap: 6px; }
+    .stepper .field { width: 100px; min-height: 38px; padding-right: 8px; text-align: center; font-size: 1rem; font-weight: 900; }
+    .quick-counts { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 5px; margin-top: 9px; }
+    .quick-counts.two { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .count-btn { min-height: 34px; padding: 4px; border: 1px solid var(--line); border-radius: 8px; color: #9ca3af; background: #151b24; font-size: .77rem; font-weight: 800; }
+    .count-btn:hover:not(:disabled), .count-btn.selected { border-color: rgba(56,189,248,.46); color: #bae6fd; background: rgba(56,189,248,.12); }
+    .distribution-summary { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; padding: 13px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-3); }
+    .distribution-summary p { margin: 0; color: #737c89; font-size: .75rem; }
+    .distribution-summary strong { display: block; margin-top: 3px; font-size: 1rem; }
+    .detail-section { border-top: 1px solid var(--line); padding-top: 13px; }
+    .detail-section h3 { margin: 0 0 8px; font-size: .88rem; }
+    .detail-record { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px solid rgba(255,255,255,.055); color: #aeb4bd; font-size: .8rem; }
+    .viewer { width: min(1180px, calc(100% - 24px)); background: #07090d; }
+    .viewer .dialog-head { color: #fff; background: #0d1118; }
+    .viewer-image { width: 100%; max-height: calc(100vh - 120px); display: block; object-fit: contain; }
+    .confirm-dialog { width: min(430px, calc(100% - 28px)); }
+
+    .toast {
+      position: fixed;
+      z-index: 100;
+      top: 18px;
+      left: 50%;
+      max-width: calc(100% - 28px);
+      padding: 11px 15px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 11px;
+      color: #fff;
+      background: #202733;
+      box-shadow: 0 12px 34px rgba(0,0,0,.38);
+      font-size: .85rem;
+      font-weight: 800;
+      transform: translate(-50%,-18px);
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s ease;
+    }
+    .toast.show { transform: translate(-50%,0); opacity: 1; }
+    .toast.success { border-color: rgba(52,211,153,.27); background: #103128; }
+    .toast.error { border-color: rgba(248,113,113,.3); background: #3a171b; }
+
+    @media (max-width: 1100px) {
+      .summary-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .workspace-top { align-items: stretch; flex-direction: column; }
+      .quick-actions { align-self: flex-end; }
+      .ranking-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    }
+    @media (max-width: 760px) {
+      .header-inner, .page { width: min(100% - 24px,1500px); }
+      .header-inner { min-height: 70px; }
+      .brand-mark { width: 41px; height: 41px; }
+      .alliance-title { font-size: 1.05rem; }
+      .creator-link { width: 40px; height: 40px; padding: 0; justify-content: center; }
+      .creator-text { display: none; }
+      .summary-grid { gap: 9px; }
+      .summary-card { min-height: 122px; padding: 15px; }
+      .summary-value { font-size: 1.15rem; white-space: normal; }
+      .summary-icon { width: 36px; height: 36px; }
+      .tabs { width: 100%; }
+      .tab-btn { padding: 8px 12px; }
+      .quick-actions { width: 100%; display: grid; grid-template-columns: 1fr 1fr; }
+      .panel-header { align-items: stretch; flex-direction: column; padding: 15px; }
+      .panel-tools { align-items: stretch; flex-direction: column; }
+      #panel-history .panel-tools > .btn {
+        width: 100%;
+        flex-basis: 42px;
+      }
+      .search-wrap { min-width: 0; width: 100%; }
+      .desktop-table { display: none; }
+      .mobile-list { display: grid; }
+      .mobile-member {
+        padding: 15px;
+        border-bottom: 1px solid var(--line);
+      }
+      .mobile-member:last-child { border-bottom: 0; }
+      .mobile-member-head { display: flex; align-items: center; justify-content: space-between; gap: 9px; }
+      .mobile-money { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 13px; text-align: center; }
+      .mobile-money p { margin: 0; color: #656e7b; font-size: .68rem; }
+      .mobile-money strong { display: block; margin-top: 3px; overflow: hidden; font-size: .8rem; text-overflow: ellipsis; }
+      .mobile-progress { margin-top: 12px; }
+      .mobile-progress .progress-track { width: 100%; }
+      .mobile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 12px; }
+      .history-item, .member-item { align-items: stretch; flex-direction: column; padding: 14px 15px; }
+      .history-side { justify-content: space-between; padding-left: 48px; }
+      .member-actions { justify-content: flex-start; }
+      .ranking-upload { grid-template-columns: 1fr; align-items: stretch; padding: 15px; }
+      .ranking-grid { grid-template-columns: 1fr; padding: 14px; }
+      .manual-wrap { padding: 14px; }
+      .manual-grid { grid-template-columns: 1fr; }
+      .report-controls { align-items: stretch; flex-direction: column; padding: 15px; }
+      .report-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+      .report-preview { padding: 10px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .pouch-top { align-items: stretch; flex-direction: column; }
+      .stepper .field { flex: 1; width: auto; }
+      .quick-counts { gap: 4px; }
+      dialog { border-radius: 14px; }
+    }
+    @media (max-width: 430px) {
+      .summary-card { min-height: 132px; }
+      .summary-icon { display: none; }
+      .edit-name span { display: none; }
+      .edit-name { width: 30px; padding: 0; justify-content: center; }
+      .dialog-foot { display: grid; grid-template-columns: 1fr 1fr; }
+      #distribution-complete { grid-column: 1 / -1; grid-row: 1; }
+      #distribution-cancel { grid-column: 1; grid-row: 2; }
+      #distribution-submit { grid-column: 2; grid-row: 2; }
+    }
+    .round-panel { padding:24px; margin:24px 0 16px; border:1px solid rgba(56,189,248,.3); border-radius:16px; background:linear-gradient(115deg,#142534,#11161e 65%); }
+    .round-toolbar { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+    .round-toolbar h2 { margin:0; font-size:1.2rem; }
+    .round-toolbar .select { width:auto; max-width:100%; }
+    .round-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:20px; }
+    .round-metric { padding:17px; background:rgba(0,0,0,.18); border-radius:12px; }
+    .round-metric p { color:#a9bacb; margin:0 0 8px; font-size:.85rem; }
+    .round-metric strong { display:block; font-size:1.45rem; overflow-wrap:anywhere; }
+    .round-metric small { display:block; color:#8c9aaa; margin-top:7px; }
+    .round-metric.emphasis { border:1px solid #38bdf8; background:rgba(56,189,248,.12); }
+    .round-metric.emphasis strong { color:#7dd3fc; }
+    .round-note { color:#9daebe; font-size:.83rem; margin:14px 0 0; }
+    .cumulative-title { color:#9ca3af; font-size:.9rem; margin:20px 0 10px; }
+    .round-account { display:flex; flex-wrap:wrap; gap:12px 28px; padding:14px 0 22px; color:#aab7c6; font-size:.86rem; }
+    .round-account strong { color:#f4f7fb; }
+    .round-cell small { display:block; color:#8896a8; font-size:.73rem; }
+    @media(max-width:900px) { .round-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+    @media(max-width:480px) { .round-panel { padding:16px; } .round-metric { padding:12px; } .round-metric strong { font-size:1.13rem; } }
+    .purchase-guide { padding:16px; border:1px solid rgba(56,189,248,.35); border-radius:12px; background:rgba(56,189,248,.07); }
+    .purchase-head { display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+    .purchase-head span, .purchase-note { color:#a1b2c5; font-size:.79rem; }
+    .purchase-note { margin:9px 0; line-height:1.6; }
+    .purchase-counts { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+    .purchase-count { padding:12px 5px; text-align:center; background:#101c29; border-radius:9px; }
+    .purchase-count span { display:block; color:#b6c5d4; font-size:.77rem; }
+    .purchase-count strong { display:block; color:#7dd3fc; font-size:1.4rem; margin-top:5px; }
+    .purchase-total { font-weight:800; margin:12px 0 5px; }
+    #distribution-dialog { max-height:92vh; overflow-y:auto; }
+  </style>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute">
+    <symbol id="i-gem" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/><path d="m11 3-3 6 4 12 4-12-3-6M2 9h20"/></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M20 7V5a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v12H5a3 3 0 0 1-3-3V6"/><path d="M16 13h4"/></symbol>
+    <symbol id="i-money" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8M12 6v12"/></symbol>
+    <symbol id="i-history" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l4 2"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z"/><path d="M4 5.5v14"/></symbol>
+    <symbol id="i-printer" viewBox="0 0 24 24"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v7H6z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 21V9m0 0 4 4m-4-4-4 4M5 3h14"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 15H6L5 6M10 11v5M14 11v5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  </svg>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark"><svg><use href="#i-gem"></use></svg></div>
+        <div class="brand-copy">
+          <div class="brand-title-row">
+            <h1 class="alliance-title" id="alliance-title"></h1>
+            <button class="edit-name" type="button" id="edit-alliance-btn" aria-label="연맹 이름 입력"><svg><use href="#i-pencil"></use></svg><span id="alliance-edit-label">연맹 이름 입력</span></button>
+          </div>
+          <p class="brand-subtitle">군도 세금 분배 장부 · 배포용</p>
+        </div>
+      </div>
+      <a class="creator-link" href="https://www.youtube.com/@%EA%B0%93%EC%A1%B4%EC%8A%A8/featured" target="_blank" rel="noopener noreferrer" title="갓존슨 유튜브 채널 열기">
+        <span class="creator-text">제작자 : 갓존슨</span>
+        <span class="youtube-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 7 8 5-8 5z"/></svg></span>
+      </a>
+    </div>
+  </header>
+
+  <main class="page">
+    <section class="round-panel" aria-label="회차별 세금 분배">
+      <div class="round-toolbar"><div><h2>이번에 분배할 세금</h2><p class="round-note" id="round-range"></p></div><div style="display:flex;gap:8px;flex-wrap:wrap"><select class="select" id="round-select" aria-label="분배 회차 선택"></select><button class="btn btn-outline" id="round-today" type="button">현재 회차</button></div></div>
+      <div class="round-grid">
+        <div class="round-metric"><p>이번 회차 새로 들어온 세금</p><strong id="round-incoming">0 다이아</strong><small>선택한 회차의 유입액만 표시</small></div>
+        <div class="round-metric"><p>이전 회차에서 넘어온 미분배액</p><strong id="round-carry">0 다이아</strong><small>지난 회차까지 지급하지 못한 금액</small></div>
+        <div class="round-metric"><p>이번 회차 지급 완료</p><strong id="round-paid">0 다이아</strong><small id="round-transfer">연맹 귀속 0 다이아 별도</small></div>
+        <div class="round-metric emphasis"><p>아직 분배해야 할 금액</p><strong id="round-remaining">0 다이아</strong><small id="round-target">이번 회차 총 분배 대상 0 다이아</small></div>
+      </div>
+      <p class="round-note">매월 첫째·셋째 월요일 시작 · 새 유입 + 이전 미분배 − 지급 − 연맹 귀속 = 남은 분배액</p>
+      <p class="round-note" id="round-warning"></p>
+    </section>
+    <h2 class="cumulative-title">전체 누적 현황 · 모든 회차 합계</h2>
+    <section class="summary-grid" aria-label="세금 분배 요약">
+      <article class="summary-card"><div><p class="summary-label">현재 연맹원</p><p class="summary-value" id="sum-members">0명</p><p class="summary-sub" id="sum-members-sub">분배 대상 0명 · 미지급 0명</p></div><div class="summary-icon violet"><svg><use href="#i-users"></use></svg></div></article>
+      <article class="summary-card"><div><p class="summary-label">누적 세금 유입액</p><p class="summary-value" id="sum-allocated">0 다이아</p><p class="summary-sub">지금까지 기록한 모든 세금 합계</p></div><div class="summary-icon amber"><svg><use href="#i-money"></use></svg></div></article>
+      <article class="summary-card"><div><p class="summary-label">누적 주머니 지급</p><p class="summary-value" id="sum-distributed">0 다이아</p><p class="summary-sub" id="sum-completed">완료 0명</p></div><div class="summary-icon sky"><svg><use href="#i-wallet"></use></svg></div></article>
+      <article class="summary-card"><div><p class="summary-label">전체 미분배 잔액</p><p class="summary-value" id="sum-remaining">0 다이아</p><p class="summary-sub">탈퇴·미지급 인원 잔액도 포함</p></div><div class="summary-icon rose"><svg><use href="#i-gem"></use></svg></div></article>
+    </section>
+
+    <div class="round-account"><span>누적 연맹 귀속액 <strong id="sum-fund">0 다이아</strong></span><span>장부상 창고 잔액 <strong id="sum-warehouse">0 다이아</strong></span><span>창고 잔액 = 누적 유입 − 누적 주머니 지급 (연맹 귀속액 포함)</span></div>
+    <section class="workspace">
+      <div class="workspace-top">
+        <nav class="tabs" aria-label="장부 메뉴">
+          <button type="button" class="tab-btn active" data-tab="overview"><svg><use href="#i-wallet"></use></svg>분배 현황</button>
+          <button type="button" class="tab-btn" data-tab="history"><svg><use href="#i-history"></use></svg>전체 기록</button>
+          <button type="button" class="tab-btn" data-tab="members"><svg><use href="#i-settings"></use></svg>연맹원 관리</button>
+          <button type="button" class="tab-btn" data-tab="rankings"><svg><use href="#i-image"></use></svg>랭킹 저장</button>
+          <button type="button" class="tab-btn" data-tab="manual"><svg><use href="#i-book"></use></svg>설명서</button>
+          <button type="button" class="tab-btn" data-tab="output"><svg><use href="#i-printer"></use></svg>출력 <span class="tab-tag">PNG</span></button>
+        </nav>
+        <div class="quick-actions" id="quick-actions">
+          <button type="button" class="btn btn-danger" data-reset-all><svg><use href="#i-trash"></use></svg>전체 초기화</button>
+          <button type="button" class="btn btn-outline" id="open-allocation"><svg><use href="#i-plus"></use></svg>세금 유입 등록</button>
+          <button type="button" class="btn btn-primary" id="open-distribution"><svg><use href="#i-gem"></use></svg>주머니 분배</button>
+        </div>
+      </div>
+
+      <section class="tab-panel" id="panel-overview">
+        <article class="panel">
+          <header class="panel-header">
+            <div><h2 class="panel-title">연맹원별 세금 반환 현황</h2><p class="panel-desc">선택한 회차 기준입니다. 새 유입·이월·지급·잔액을 구분하며, 아이디를 누르면 전체 누적 내역을 볼 수 있습니다.</p></div>
+            <div class="panel-tools">
+              <div class="search-wrap"><svg><use href="#i-search"></use></svg><input class="field" id="member-search" type="search" placeholder="아이디 검색"></div>
+              <select class="select" id="status-filter" aria-label="상태 필터">
+                <option value="all">전체 상태</option><option value="pending">남은 금액 있음</option><option value="complete">완료</option><option value="unassigned">세금 유입 없음</option><option value="excluded">세금 미지급</option>
+              </select>
+            </div>
+          </header>
+          <div class="desktop-table table-wrap" id="overview-table"></div>
+          <div class="mobile-list" id="overview-mobile"></div>
+          <div id="overview-empty"></div>
+        </article>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-history">
+        <article class="panel">
+          <header class="panel-header">
+            <div><h2 class="panel-title">전체 주머니 지급·귀속·세금 유입 기록</h2><p class="panel-desc">기록은 최신 순으로 표시되며 수정과 삭제가 가능합니다.</p></div>
+            <div class="panel-tools">
+              <select class="select" id="history-filter" aria-label="기록 필터"><option value="all">전체 기록</option><option value="distribution">주머니 지급</option><option value="allianceTransfer">연맹 자금 귀속</option><option value="allocation">세금 유입</option></select>
+              <button type="button" class="btn btn-outline" id="export-csv"><svg><use href="#i-download"></use></svg>CSV 내보내기</button>
+              <button type="button" class="btn btn-danger" data-reset-all><svg><use href="#i-trash"></use></svg>모든 기록 초기화</button>
+            </div>
+          </header>
+          <div class="history-list" id="history-list"></div>
+        </article>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-members">
+        <article class="panel">
+          <header class="panel-header">
+            <div><h2 class="panel-title">연맹원 관리</h2><p class="panel-desc">탈퇴 처리해도 이전 장부 기록은 그대로 보존됩니다.</p></div>
+            <button type="button" class="btn btn-primary" id="add-member"><svg><use href="#i-plus"></use></svg>연맹원 추가</button>
+          </header>
+          <div class="member-list" id="member-list"></div>
+        </article>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-rankings">
+        <article class="panel">
+          <header class="panel-header">
+            <div><h2 class="panel-title">랭킹 캡처 저장</h2><p class="panel-desc">날짜별 랭킹 화면을 첨부해 변화 기록을 한곳에서 확인할 수 있습니다.</p></div>
+          </header>
+          <form class="ranking-upload" id="ranking-form">
+            <label><span class="form-label">캡처 날짜</span><input class="field" id="ranking-date" type="date" required></label>
+            <label><span class="form-label">메모</span><input class="field" id="ranking-note" type="text" maxlength="100" placeholder="예: 시즌 시작 1일차"></label>
+            <label class="upload-field"><svg><use href="#i-upload"></use></svg><span>랭킹 사진 첨부</span><input id="ranking-files" type="file" accept="image/*" multiple></label>
+          </form>
+          <div class="ranking-grid" id="ranking-grid"></div>
+          <div id="ranking-empty"></div>
+        </article>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-manual">
+        <article class="panel">
+          <header class="panel-header"><div><h2 class="panel-title">사용 설명서</h2><p class="panel-desc">처음 사용하는 분도 아래 순서대로 입력하면 바로 이용할 수 있습니다.</p></div></header>
+          <div class="manual-wrap">
+            <div class="manual-grid">
+              <article class="manual-card"><div class="manual-number">1</div><h3>연맹 이름과 연맹원 등록</h3><p>상단 연맹명 옆의 편집 버튼으로 이름을 변경하고, 연맹원 관리에서 인원을 추가합니다. 세금을 받지 않는 인원은 세금 미지급으로 설정합니다.</p></article>
+              <article class="manual-card"><div class="manual-number">2</div><h3>회차별 군도 세금 입력</h3><p>매월 첫째·셋째 월요일부터 다음 회차 전날까지를 한 회차로 구분합니다. 실제 획득일을 입력하면 자동 분류되며, 화면 상단에서 이번 유입액과 이전 미분배액을 따로 볼 수 있습니다. 세금 유입 등록에서 실제로 군도 세금을 획득한 연맹원과 금액을 기록합니다. 입력된 금액만 해당 연맹원에게 반환할 세금으로 계산됩니다.</p></article>
+              <article class="manual-card"><div class="manual-number">3</div><h3>보석 주머니 지급</h3><p>주머니 분배에서 연맹원과 지급일을 선택하면 1,000 → 100 → 10다이아 순으로 구입할 수량을 안내합니다. 같은 날 이미 지급한 수량과 하루 한도를 반영합니다. 구입 후 ‘구입 완료 · 추천 수량 한 번에 입력’을 누르면 수량이 자동으로 채워집니다. 실제 지급을 마친 다음 ‘주머니 지급 저장’을 누르세요. 각 ‘금액에 맞춘 최대’ 버튼은 다른 주머니 입력액을 제외한 잔액까지만 입력합니다. 지급액은 남은 세금에서 자동 차감되며 하루 한도를 넘길 수 없습니다. 10 다이아 미만의 잔액이나 연맹 정책상 귀속할 금액은 ‘분배 완료’를 눌러 연맹 자금으로 처리할 수 있습니다.</p><div class="limit-table"><div class="limit-row"><span>보석 주머니 10</span><strong>하루 최대 500개</strong></div><div class="limit-row"><span>보석 주머니 100</span><strong>하루 최대 50개</strong></div><div class="limit-row"><span>보석 주머니 1000</span><strong>하루 최대 5개</strong></div></div></article>
+              <article class="manual-card"><div class="manual-number">4</div><h3>기록 확인과 랭킹 저장</h3><p>전체 기록에서 지급·유입 내역을 수정하거나 삭제할 수 있습니다. 랭킹 저장에는 게임 화면 캡처를 날짜와 함께 보관할 수 있습니다.</p></article>
+              <article class="manual-card"><div class="manual-number">5</div><h3>정리된 현황을 이미지로 저장</h3><p>출력 탭을 열면 현재 연맹명, 세금 요약, 연맹원별 획득·지급·잔액·진행률이 한 장의 보고서로 정리됩니다. 최신 내용 반영 버튼을 누른 뒤 PNG 이미지 저장을 선택하면 공유용 이미지 파일을 받을 수 있습니다.</p></article>
+            </div>
+            <div class="notice"><strong>배포용 안내:</strong> 처음 실행하면 빈 장부로 시작하며, 이후 입력한 기록은 이 브라우저에 저장됩니다. 전체 초기화는 연맹명·연맹원·세금·지급·귀속 내역·랭킹 사진을 모두 삭제합니다. 이전 버전 기록은 자동으로 불러오지 않으며, 필요할 때 백업 불러오기로 옮길 수 있습니다.<br><strong>중요:</strong> 모든 내용은 이 HTML 파일이 아니라 현재 사용 중인 브라우저에 저장됩니다. 브라우저 데이터 삭제, PC 변경, 파일 교체 전에는 아래에서 전체 백업 파일을 받아두세요.</div>
+            <div class="data-tools">
+              <button type="button" class="btn btn-outline" id="export-backup"><svg><use href="#i-download"></use></svg>전체 백업 받기</button>
+              <label class="btn btn-outline" style="position:relative;cursor:pointer"><svg><use href="#i-upload"></use></svg>백업 불러오기<input id="import-backup" type="file" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0"></label>
+              <button type="button" class="btn btn-danger" data-reset-all><svg><use href="#i-trash"></use></svg>모든 기록 초기화</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="tab-panel hidden" id="panel-output">
+        <article class="panel">
+          <header class="panel-header">
+            <div><h2 class="panel-title">분배 현황 이미지 출력</h2><p class="panel-desc">선택한 회차의 현황을 한 장의 고화질 PNG 이미지로 저장합니다.</p></div>
+          </header>
+          <div class="report-controls">
+            <div class="report-info"><strong id="report-count">현재 연맹원 0명</strong><span>선택 회차 · 이월 포함 분배 대상/회차 지급/잔액/진행률 포함</span></div>
+            <div class="report-buttons">
+              <button type="button" class="btn btn-outline" id="refresh-report"><svg><use href="#i-history"></use></svg>최신 내용 반영</button>
+              <button type="button" class="btn btn-primary" id="save-report"><svg><use href="#i-download"></use></svg>PNG 이미지 저장</button>
+            </div>
+          </div>
+          <div class="report-preview">
+            <canvas class="report-canvas" id="report-canvas" width="1600" height="900" role="img" aria-label="군도 세금 분배 현황 이미지 미리보기"></canvas>
+          </div>
+        </article>
+      </section>
+    </section>
+  </main>
+
+  <dialog id="alliance-dialog">
+    <form method="dialog" id="alliance-form">
+      <header class="dialog-head"><div><h2 class="dialog-title">연맹 이름 변경</h2><p class="dialog-desc">입력한 이름은 이 브라우저에 저장됩니다.</p></div><button type="button" class="dialog-close" data-close="alliance-dialog" aria-label="닫기"><svg><use href="#i-close"></use></svg></button></header>
+      <div class="dialog-body"><label><span class="form-label">연맹 이름</span><input class="field" id="alliance-input" maxlength="30" required placeholder="연맹 이름을 입력하세요"></label></div>
+      <footer class="dialog-foot"><button type="button" class="btn btn-outline" data-close="alliance-dialog">취소</button><button type="submit" class="btn btn-primary">변경 저장</button></footer>
+    </form>
+  </dialog>
+
+  <dialog id="member-dialog">
+    <form method="dialog" id="member-form">
+      <header class="dialog-head"><div><h2 class="dialog-title" id="member-dialog-title">연맹원 추가</h2><p class="dialog-desc">아이디와 필요한 메모를 입력하세요.</p></div><button type="button" class="dialog-close" data-close="member-dialog" aria-label="닫기"><svg><use href="#i-close"></use></svg></button></header>
+      <div class="dialog-body">
+        <input id="member-id" type="hidden">
+        <label><span class="form-label">아이디</span><input class="field" id="member-name" maxlength="30" required placeholder="게임 아이디"></label>
+        <label><span class="form-label">메모 <span style="font-weight:400;color:#606975">(선택)</span></span><textarea class="textarea" id="member-note" maxlength="200" placeholder="직책이나 확인할 내용을 적어두세요."></textarea></label>
+        <label class="check-row"><input id="member-excluded" type="checkbox">군도 세금 미지급 인원으로 설정</label>
+      </div>
+      <footer class="dialog-foot"><button type="button" class="btn btn-outline" data-close="member-dialog">취소</button><button type="submit" class="btn btn-primary">저장</button></footer>
+    </form>
+  </dialog>
+
+  <dialog id="allocation-dialog">
+    <form method="dialog" id="allocation-form">
+      <header class="dialog-head"><div><h2 class="dialog-title" id="allocation-title">개인 군도 세금 유입 등록</h2><p class="dialog-desc">실제 세금 획득일을 기준으로 첫째·셋째 월요일 회차에 자동 분류됩니다. 늦게 입력할 때도 실제 획득일을 선택해주세요.</p></div><button type="button" class="dialog-close" data-close="allocation-dialog" aria-label="닫기"><svg><use href="#i-close"></use></svg></button></header>
+      <div class="dialog-body">
+        <input id="allocation-id" type="hidden">
+        <label><span class="form-label">아이디</span><select class="select" id="allocation-member" required></select></label>
+        <div class="form-grid">
+          <label><span class="form-label">획득한 군도 세금</span><input class="field" id="allocation-amount" inputmode="numeric" pattern="[0-9]*" required placeholder="10000"></label>
+          <label><span class="form-label">세금 획득일 (회차 자동 분류)</span><input class="field" id="allocation-date" type="date" required></label>
+        </div>
+        <label><span class="form-label">메모 <span style="font-weight:400;color:#606975">(선택)</span></span><textarea class="textarea" id="allocation-note" maxlength="200" placeholder="예: 9월 8일 군도 점수 보상"></textarea></label>
+      </div>
+      <footer class="dialog-foot"><button type="button" class="btn btn-outline" data-close="allocation-dialog">취소</button><button type="submit" class="btn btn-amber">세금 유입 저장</button></footer>
+    </form>
+  </dialog>
+
+  <dialog id="distribution-dialog">
+    <form method="dialog" id="distribution-form">
+      <header class="dialog-head"><div><h2 class="dialog-title" id="distribution-title">보석 주머니 지급 기록</h2><p class="dialog-desc">수량을 직접 입력하거나 최대 버튼을 사용하세요.</p></div><button type="button" class="dialog-close" data-close="distribution-dialog" aria-label="닫기"><svg><use href="#i-close"></use></svg></button></header>
+      <div class="dialog-body">
+        <input id="distribution-id" type="hidden">
+        <label><span class="form-label">받은 아이디</span><select class="select" id="distribution-member" required></select></label>
+        <label><span class="form-label">분배 일시</span><input class="field" id="distribution-at" type="datetime-local" required></label>
+        <section class="purchase-guide" aria-label="구입할 보석 주머니 안내">
+          <div class="purchase-head"><strong>구입할 보석 주머니</strong><span>1,000 → 100 → 10 우선</span></div>
+          <p id="purchase-date" class="purchase-note"></p>
+          <div id="purchase-counts" class="purchase-counts"></div>
+          <p id="purchase-total" class="purchase-total"></p>
+          <p id="purchase-remainder" class="purchase-note" aria-live="polite"></p>
+          <button type="button" class="btn btn-primary" id="apply-pouch-plan" style="width:100%">구입 완료 · 추천 수량 한 번에 입력</button>
+          <p class="purchase-note">보유 주머니는 필요한 수량에서 빼고 구입하세요. 버튼은 수량만 입력하며, 실제 지급 후 ‘주머니 지급 저장’을 눌러 기록하세요.</p>
+        </section>
+        <div class="pouch-stack" id="pouch-stack"></div>
+        <div class="distribution-summary"><div><p>지급 전 남은 세금</p><strong id="dist-before">0 다이아</strong></div><div class="right"><p>이번 주머니 지급액</p><strong class="money-sky" id="dist-total">0 다이아</strong></div></div>
+        <label><span class="form-label">메모 <span style="font-weight:400;color:#606975">(선택)</span></span><textarea class="textarea" id="distribution-note" maxlength="200" placeholder="확인이 필요한 내용을 적어두세요."></textarea></label>
+        <p id="dist-error" class="hidden" style="margin:0;color:#fca5a5;font-size:.82rem"></p>
+      </div>
+      <footer class="dialog-foot"><button type="button" class="btn btn-outline" id="distribution-cancel" data-close="distribution-dialog">취소</button><button type="button" class="btn btn-complete" id="distribution-complete">분배 완료 (잔액 연맹 귀속)</button><button type="submit" class="btn btn-primary" id="distribution-submit">주머니 지급 저장</button></footer>
+    </form>
+  </dialog>
+
+  <dialog id="detail-dialog">
+    <header class="dialog-head"><div><h2 class="dialog-title" id="detail-title">연맹원 상세</h2><p class="dialog-desc" id="detail-subtitle"></p></div><button type="button" class="dialog-close" data-close="detail-dialog" aria-label="닫기"><svg><use href="#i-close"></use></svg></button></header>
+    <div class="dialog-body" id="detail-body"></div>
+    <footer class="dialog-foot"><button type="button" class="btn btn-outline" data-close="detail-dialog">닫기</button><button type="button" class="btn btn-primary" id="detail-distribute"><svg><use href="#i-gem"></use></svg>주머니 지급</button></footer>
+  </dialog>
+
+  <dialog class="viewer" id="viewer-dialog">
+    <header class="dialog-head"><div><h2 class="dialog-title" id="viewer-title">랭킹 캡처</h2><p class="dialog-desc" id="viewer-subtitle"></p></div><button type="button" class="dialog-close" data-close="viewer-dialog" aria-label="닫기"><svg><use href="#i-close"></use></svg></button></header>
+    <img class="viewer-image" id="viewer-image" alt="랭킹 캡처 확대 보기">
+  </dialog>
+
+  <dialog class="confirm-dialog" id="confirm-dialog">
+    <header class="dialog-head"><div><h2 class="dialog-title" id="confirm-title">삭제할까요?</h2><p class="dialog-desc" id="confirm-desc"></p></div></header>
+    <footer class="dialog-foot"><button type="button" class="btn btn-outline" id="confirm-cancel">취소</button><button type="button" class="btn btn-danger" id="confirm-ok">삭제</button></footer>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "godjohnson.islandTaxLedger.public.v1";
+      var DB_NAME = "godjohnson.islandTaxRankings.public.v1";
+      var POUCHES = [
+        { key: "pouch10", label: "보석 주머니 (10)", value: 10, limit: 500 },
+        { key: "pouch100", label: "보석 주머니 (100)", value: 100, limit: 50 },
+        { key: "pouch1000", label: "보석 주머니 (1000)", value: 1000, limit: 5 }
+      ];
+      var state = loadState();
+      var selectedRound = roundStart(koreaToday());
+      var rankings = [];
+      var sortKey = "name";
+      var sortDirection = "asc";
+      var activeTab = "overview";
+      var detailMemberId = null;
+      var confirmAction = null;
+      var toastTimer = null;
+
+      function defaultState() {
+        return { version: 2, allianceName: "", members: [], allocations: [], distributions: [] };
+      }
+
+      function loadState() {
+        try {
+          var parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          if (!parsed || !Array.isArray(parsed.members) || !Array.isArray(parsed.allocations) || !Array.isArray(parsed.distributions)) return defaultState();
+          parsed.allianceName = String(parsed.allianceName || "");
+          return parsed;
+        } catch (error) {
+          return defaultState();
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch (error) {
+          toast("기록 저장 공간이 부족합니다. 전체 백업을 받은 뒤 불필요한 데이터를 정리해주세요.", "error");
+        }
+      }
+
+      function uid(prefix) {
+        if (window.crypto && crypto.randomUUID) return prefix + "-" + crypto.randomUUID();
+        return prefix + "-" + Date.now() + "-" + Math.random().toString(16).slice(2);
+      }
+
+      function esc(value) {
+        return String(value == null ? "" : value)
+          .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+      }
+
+      function diamonds(value) {
+        return Math.round(Number(value) || 0).toLocaleString("ko-KR") + " 다이아";
+      }
+
+      function differenceHtml(stats) {
+        if (!stats.allocated) return '<div class="difference-cell"><span class="difference-line empty">-</span></div>';
+        var lines = [];
+        if (stats.remaining > 0) lines.push('<span class="difference-line pending">미분배 ' + diamonds(stats.remaining) + '</span>');
+        if (stats.allianceFund > 0) lines.push('<span class="difference-line transfer">귀속 ' + diamonds(stats.allianceFund) + '</span>');
+        if (!lines.length) lines.push('<span class="difference-line zero">0 다이아</span>');
+        return '<div class="difference-cell">' + lines.join("") + "</div>";
+      }
+
+      function koreaParts(withTime) {
+        var options = { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit" };
+        if (withTime) { options.hour = "2-digit"; options.minute = "2-digit"; options.hourCycle = "h23"; }
+        var parts = new Intl.DateTimeFormat("en-CA", options).formatToParts(new Date());
+        var pick = function (type) { var found = parts.find(function (part) { return part.type === type; }); return found ? found.value : ""; };
+        return { year: pick("year"), month: pick("month"), day: pick("day"), hour: pick("hour"), minute: pick("minute") };
+      }
+
+      function koreaToday() {
+        var p = koreaParts(false);
+        return p.year + "-" + p.month + "-" + p.day;
+      }
+
+      function koreaNowInput() {
+        var p = koreaParts(true);
+        return p.year + "-" + p.month + "-" + p.day + "T" + p.hour + ":" + p.minute;
+      }
+
+      function toIso(koreaInput) {
+        return new Date(koreaInput + ":00+09:00").toISOString();
+      }
+
+      function isoToKoreaInput(iso) {
+        var date = new Date(iso);
+        var parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(date);
+        var pick = function (type) { var found = parts.find(function (part) { return part.type === type; }); return found ? found.value : ""; };
+        return pick("year") + "-" + pick("month") + "-" + pick("day") + "T" + pick("hour") + ":" + pick("minute");
+      }
+
+      function formatDateTime(iso) {
+        try {
+          return new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(iso));
+        } catch (error) { return iso; }
+      }
+
+      function memberById(id) {
+        return state.members.find(function (member) { return member.id === id; }) || null;
+      }
+
+      function memberStats(member) {
+        var allocated = state.allocations.filter(function (entry) { return entry.memberId === member.id; }).reduce(function (sum, entry) { return sum + Number(entry.amount || 0); }, 0);
+        var memberDistributions = state.distributions.filter(function (entry) { return entry.memberId === member.id; });
+        var distributed = memberDistributions.filter(function (entry) { return !entry.isAllianceTransfer; }).reduce(function (sum, entry) { return sum + Number(entry.total || 0); }, 0);
+        var allianceFund = memberDistributions.filter(function (entry) { return entry.isAllianceTransfer; }).reduce(function (sum, entry) { return sum + Number(entry.total || 0); }, 0);
+        var settled = distributed + allianceFund;
+        return { allocated: allocated, distributed: distributed, allianceFund: allianceFund, settled: settled, remaining: Math.max(0, allocated - settled) };
+      }
+
+      function dateString(date) { return date.toISOString().slice(0,10); }
+      function firstMonday(year, month) {
+        var d = new Date(Date.UTC(year, month, 1));
+        d.setUTCDate(1 + (8 - d.getUTCDay()) % 7); return d;
+      }
+      function roundStart(day) {
+        var d = new Date(day + "T00:00:00Z"), first = firstMonday(d.getUTCFullYear(), d.getUTCMonth());
+        var third = new Date(first); third.setUTCDate(first.getUTCDate() + 14);
+        if (d >= third) return dateString(third);
+        if (d >= first) return dateString(first);
+        var prev = firstMonday(d.getUTCFullYear(),d.getUTCMonth()-1); prev.setUTCDate(prev.getUTCDate()+14); return dateString(prev);
+      }
+      function roundEnd(start) {
+        var d = new Date(start + "T00:00:00Z"), first = firstMonday(d.getUTCFullYear(),d.getUTCMonth());
+        if (d.getUTCDate() === first.getUTCDate()) { d.setUTCDate(d.getUTCDate()+14); return dateString(d); }
+        return dateString(firstMonday(d.getUTCFullYear(),d.getUTCMonth()+1));
+      }
+      function roundLabel(start) {
+        var d = new Date(start + "T00:00:00Z");
+        return start + " · " + (d.getUTCDate() <= 7 ? "첫째" : "셋째") + " 월요일 회차";
+      }
+      function paymentDay(entry) { return entry.distributionDate || isoToKoreaInput(entry.distributedAt).slice(0,10); }
+      function roundStats(member) {
+        var end = roundEnd(selectedRound), opening = 0, incoming = 0, distributed = 0, allianceFund = 0;
+        state.allocations.filter(function(e){ return e.memberId === member.id; }).forEach(function(e){
+          if(e.allocatedAt < selectedRound) opening += Number(e.amount)||0;
+          else if(e.allocatedAt < end) incoming += Number(e.amount)||0;
+        });
+        state.distributions.filter(function(e){return e.memberId === member.id;}).forEach(function(e){
+          var day = paymentDay(e), amount = Number(e.total)||0;
+          if(day < selectedRound) opening -= amount;
+          else if(day < end) { if(e.isAllianceTransfer) allianceFund += amount; else distributed += amount; }
+        });
+        var allocated = opening + incoming, settled = distributed + allianceFund;
+        return { incoming:incoming, carry:opening, allocated:allocated, distributed:distributed, allianceFund:allianceFund, settled:settled, remaining:allocated-settled };
+      }
+      function roundSummary() {
+        return state.members.reduce(function(sum,m){ var r=roundStats(m); Object.keys(sum).forEach(function(k){sum[k]+=r[k];}); return sum; }, {incoming:0,carry:0,allocated:0,distributed:0,allianceFund:0,settled:0,remaining:0});
+      }
+      function renderRound() {
+        var starts = new Set([roundStart(koreaToday()),selectedRound]);
+        state.allocations.forEach(function(e){starts.add(roundStart(e.allocatedAt));});
+        state.distributions.forEach(function(e){starts.add(roundStart(paymentDay(e)));});
+        var earliest = Array.from(starts).sort()[0], cursor = earliest, latest = Array.from(starts).sort().pop();
+        while(cursor < latest) { starts.add(cursor); cursor=roundEnd(cursor); }
+        document.getElementById("round-select").innerHTML = Array.from(starts).sort().reverse().map(function(day){ return '<option value="'+day+'">'+roundLabel(day)+'</option>'; }).join("");
+        document.getElementById("round-select").value=selectedRound;
+        var end = roundEnd(selectedRound), last = new Date(end+"T00:00:00Z"); last.setUTCDate(last.getUTCDate()-1);
+        document.getElementById("round-range").textContent=selectedRound+" ~ "+dateString(last)+" · 한국시간 · 기록된 내역 기준";
+        var r=roundSummary();
+        [["incoming",r.incoming],["carry",r.carry],["paid",r.distributed],["remaining",r.remaining]].forEach(function(pair){ document.getElementById("round-"+pair[0]).textContent=diamonds(pair[1]); });
+        document.getElementById("round-transfer").textContent="연맹 귀속 "+diamonds(r.allianceFund)+" 별도";
+        document.getElementById("round-target").textContent="이번 회차 총 분배 대상 "+diamonds(r.allocated);
+        var held=state.members.filter(function(m){return !m.isActive || m.isTaxExcluded;}).reduce(function(sum,m){return sum+roundStats(m).remaining;},0);
+        var bad=state.members.some(function(m){var v=roundStats(m);return v.carry<0 || v.remaining<0;});
+        document.getElementById("round-warning").textContent=(held ? "잔액 중 탈퇴·세금 미지급 인원 보류액: "+diamonds(held)+". 연맹원 관리에서 확인하세요. " : "")+(bad ? "유입보다 지급이 많은 기록이 있습니다. 전체 기록에서 금액과 날짜를 확인해주세요." : "")+(selectedRound!==roundStart(koreaToday()) ? " 과거·다른 회차 조회 중입니다. 지급 입력은 전체 미분배 잔액을 기준으로 합니다." : "");
+      }
+
+      function memberStatus(member) {
+        var stats = roundStats(member);
+        if (!member.isActive) return { label: "탈퇴", tone: "muted" };
+        if (member.isTaxExcluded) return { label: "세금 미지급", tone: "excluded" };
+        if (stats.allocated === 0) return { label: "세금 유입 없음", tone: "waiting" };
+        if (stats.remaining === 0) return { label: "완료", tone: "complete" };
+        if (stats.settled === 0) return { label: "분배 대기", tone: "waiting" };
+        return { label: "분배 중", tone: "progress" };
+      }
+
+      function statusBadge(member) {
+        var status = memberStatus(member);
+        return '<span class="badge badge-' + status.tone + '">' + status.label + "</span>";
+      }
+
+      function summary() {
+        var active = state.members.filter(function (member) { return member.isActive; });
+        var eligible = active.filter(function (member) { return !member.isTaxExcluded; });
+        var allocated = state.allocations.reduce(function (sum, entry) { return sum + Number(entry.amount || 0); }, 0);
+        var distributed = state.distributions.filter(function (entry) { return !entry.isAllianceTransfer; }).reduce(function (sum, entry) { return sum + Number(entry.total || 0); }, 0);
+        var allianceFund = state.distributions.filter(function (entry) { return entry.isAllianceTransfer; }).reduce(function (sum, entry) { return sum + Number(entry.total || 0); }, 0);
+        var remaining = allocated - distributed - allianceFund;
+        var completed = eligible.filter(function (member) { var stats = memberStats(member); return stats.allocated > 0 && stats.remaining === 0; }).length;
+        return { active: active.length, eligible: eligible.length, excluded: active.length - eligible.length, allocated: allocated, distributed: distributed, allianceFund: allianceFund, remaining: remaining, completed: completed };
+      }
+
+      function toast(message, tone) {
+        var node = document.getElementById("toast");
+        clearTimeout(toastTimer);
+        node.textContent = message;
+        node.className = "toast show " + (tone || "success");
+        toastTimer = setTimeout(function () { node.className = "toast"; }, 2600);
+      }
+
+      function emptyBlock(title, desc, button) {
+        return '<div class="empty"><div class="empty-mark"><svg><use href="#i-info"></use></svg></div><strong>' + esc(title) + '</strong><p>' + esc(desc) + "</p>" + (button || "") + "</div>";
+      }
+
+      function renderHeaderAndSummary() {
+        var allianceName = state.allianceName.trim();
+        document.getElementById("alliance-title").textContent = allianceName;
+        document.getElementById("alliance-edit-label").textContent = allianceName ? "편집" : "연맹 이름 입력";
+        document.getElementById("edit-alliance-btn").setAttribute("aria-label",allianceName ? "연맹 이름 편집" : "연맹 이름 입력");
+        document.title = allianceName ? allianceName + " 군도 세금 분배 장부" : "군도 세금 분배 장부";
+        renderRound();
+        var s = summary();
+        document.getElementById("sum-fund").textContent = diamonds(s.allianceFund);
+        document.getElementById("sum-warehouse").textContent = diamonds(s.allocated - s.distributed);
+        document.getElementById("sum-members").textContent = s.active.toLocaleString("ko-KR") + "명";
+        document.getElementById("sum-members-sub").textContent = "분배 대상 " + s.eligible + "명 · 미지급 " + s.excluded + "명";
+        document.getElementById("sum-allocated").textContent = diamonds(s.allocated);
+        document.getElementById("sum-distributed").textContent = diamonds(s.distributed);
+        document.getElementById("sum-remaining").textContent = diamonds(s.remaining);
+        document.getElementById("sum-completed").textContent = "완료 " + s.completed + "명" + (s.allianceFund ? " · 연맹 귀속 " + s.allianceFund.toLocaleString("ko-KR") : "");
+      }
+
+      function sortMembers(list) {
+        return list.slice().sort(function (a, b) {
+          var aStats = roundStats(a), bStats = roundStats(b), result = 0;
+          if (sortKey === "name") result = a.name.localeCompare(b.name, "ko-KR", { numeric: true });
+          if (sortKey === "status") result = memberStatus(a).label.localeCompare(memberStatus(b).label, "ko-KR");
+          if (sortKey === "allocated") result = aStats.allocated - bStats.allocated;
+          if (sortKey === "distributed") result = aStats.distributed - bStats.distributed;
+          if (sortKey === "remaining") result = aStats.remaining - bStats.remaining;
+          if (sortKey === "progress") result = (aStats.allocated ? aStats.settled / aStats.allocated : 0) - (bStats.allocated ? bStats.settled / bStats.allocated : 0);
+          if (result === 0) result = a.name.localeCompare(b.name, "ko-KR", { numeric: true });
+          return sortDirection === "asc" ? result : -result;
+        });
+      }
+
+      function canvasRoundRect(ctx,x,y,width,height,radius,fill,stroke) {
+        var r = Math.min(radius,width / 2,height / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r,y);
+        ctx.arcTo(x + width,y,x + width,y + height,r);
+        ctx.arcTo(x + width,y + height,x,y + height,r);
+        ctx.arcTo(x,y + height,x,y,r);
+        ctx.arcTo(x,y,x + width,y,r);
+        ctx.closePath();
+        if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+        if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 1; ctx.stroke(); }
+      }
+
+      function canvasText(ctx,text,x,y,font,color,align,maxWidth) {
+        ctx.font = font;
+        ctx.fillStyle = color;
+        ctx.textAlign = align || "left";
+        ctx.textBaseline = "middle";
+        var output = String(text);
+        if (maxWidth && ctx.measureText(output).width > maxWidth) {
+          while (output.length > 1 && ctx.measureText(output + "…").width > maxWidth) output = output.slice(0,-1);
+          output += "…";
+        }
+        ctx.fillText(output,x,y);
+      }
+
+      function reportTime() {
+        var p = koreaParts(true);
+        return p.year + "." + p.month + "." + p.day + " " + p.hour + ":" + p.minute;
+      }
+
+      function drawReport() {
+        var canvas = document.getElementById("report-canvas");
+        if (!canvas) return;
+        var members = sortMembers(state.members.filter(function (member) { return member.isActive; }));
+        var s = Object.assign({},summary(),roundSummary());
+        s.completed = members.filter(function(m){var r=roundStats(m);return !m.isTaxExcluded && r.allocated>0 && r.remaining===0;}).length;
+        var width = 1600;
+        var tableTop = 355;
+        var headerHeight = 58;
+        var rowHeight = 52;
+        var rowCount = Math.max(1,members.length);
+        var height = tableTop + headerHeight + rowCount * rowHeight + 92;
+        canvas.width = width;
+        canvas.height = height;
+        var ctx = canvas.getContext("2d");
+
+        ctx.fillStyle = "#090c11";
+        ctx.fillRect(0,0,width,height);
+        var glow = ctx.createRadialGradient(1320,-50,0,1320,-50,580);
+        glow.addColorStop(0,"rgba(56,189,248,.13)");
+        glow.addColorStop(1,"rgba(56,189,248,0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0,0,width,520);
+
+        canvasRoundRect(ctx,56,48,64,64,17,"rgba(56,189,248,.13)","rgba(125,211,252,.32)");
+        ctx.strokeStyle = "#7dd3fc";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(77,70); ctx.lineTo(99,70); ctx.lineTo(108,82); ctx.lineTo(88,105); ctx.lineTo(68,82); ctx.closePath(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(68,82); ctx.lineTo(108,82); ctx.moveTo(83,70); ctx.lineTo(76,82); ctx.lineTo(88,105); ctx.lineTo(99,82); ctx.lineTo(93,70); ctx.stroke();
+
+        canvasText(ctx,state.allianceName || "연맹 이름 미설정",140,69,'900 36px "Noto Sans KR", Arial, sans-serif',"#ffffff","left",900);
+        canvasText(ctx,"회차별 분배 현황 · " + selectedRound,140,102,'700 19px "Noto Sans KR", Arial, sans-serif',"#7b8492");
+        canvasText(ctx,"기준  " + reportTime() + "  ·  한국시간",1544,68,'700 17px "Noto Sans KR", Arial, sans-serif',"#98a1ad","right");
+        canvasText(ctx,"제작자 : 갓존슨",1544,101,'700 16px "Noto Sans KR", Arial, sans-serif',"#697381","right");
+
+        var cards = [
+          { label:"현재 연맹원", value:s.active.toLocaleString("ko-KR") + "명", sub:"분배 대상 " + s.eligible + "명 · 미지급 " + s.excluded + "명", color:"#c4b5fd", soft:"rgba(139,92,246,.12)" },
+          { label:"이번 회차 유입", value:diamonds(s.incoming), sub:"이전 미분배 " + diamonds(s.carry), color:"#fcd34d", soft:"rgba(251,191,36,.11)" },
+          { label:"이번 회차 주머니 지급", value:diamonds(s.distributed), sub:"분배 완료 " + s.completed + "명" + (s.allianceFund ? " · 연맹 귀속 " + s.allianceFund.toLocaleString("ko-KR") : ""), color:"#7dd3fc", soft:"rgba(56,189,248,.11)" },
+          { label:"남은 반환 세금", value:diamonds(s.remaining), sub:"앞으로 지급해야 할 다이아", color:"#fda4af", soft:"rgba(244,63,94,.1)" }
+        ];
+        var gap = 16, cardWidth = 360, cardY = 155, cardHeight = 142;
+        cards.forEach(function (card,index) {
+          var x = 56 + index * (cardWidth + gap);
+          canvasRoundRect(ctx,x,cardY,cardWidth,cardHeight,16,"rgba(20,25,34,.96)","rgba(255,255,255,.09)");
+          canvasRoundRect(ctx,x + 22,cardY + 21,42,42,12,card.soft,null);
+          ctx.fillStyle = card.color;
+          ctx.beginPath(); ctx.arc(x + 43,cardY + 42,7,0,Math.PI * 2); ctx.fill();
+          canvasText(ctx,card.label,x + 78,cardY + 34,'700 17px "Noto Sans KR", Arial, sans-serif',"#a1a8b2");
+          canvasText(ctx,card.value,x + 22,cardY + 84,'900 27px "Noto Sans KR", Arial, sans-serif',"#ffffff","left",316);
+          canvasText(ctx,card.sub,x + 22,cardY + 119,'600 14px "Noto Sans KR", Arial, sans-serif',"#66707e","left",316);
+        });
+
+        canvasText(ctx,"연맹원별 세금 반환 현황",56,329,'900 22px "Noto Sans KR", Arial, sans-serif',"#ffffff");
+        canvasText(ctx,"현재 연맹원 " + members.length + "명",1544,329,'700 15px "Noto Sans KR", Arial, sans-serif',"#78818e","right");
+
+        canvasRoundRect(ctx,56,tableTop,1488,headerHeight + rowCount * rowHeight,14,"#11161e","rgba(255,255,255,.1)");
+        ctx.fillStyle = "#171d27";
+        ctx.fillRect(57,tableTop + 1,1486,headerHeight - 1);
+
+        var headY = tableTop + headerHeight / 2;
+        canvasText(ctx,"아이디",80,headY,'800 15px "Noto Sans KR", Arial, sans-serif',"#8b94a1");
+        canvasText(ctx,"상태",390,headY,'800 15px "Noto Sans KR", Arial, sans-serif',"#8b94a1");
+        canvasText(ctx,"유입 + 이전 미분배",820,headY,'800 15px "Noto Sans KR", Arial, sans-serif',"#8b94a1","right");
+        canvasText(ctx,"회차 지급 완료",1050,headY,'800 15px "Noto Sans KR", Arial, sans-serif',"#8b94a1","right");
+        canvasText(ctx,"회차 말 미분배",1280,headY,'800 15px "Noto Sans KR", Arial, sans-serif',"#8b94a1","right");
+        canvasText(ctx,"진행률",1518,headY,'800 15px "Noto Sans KR", Arial, sans-serif',"#8b94a1","right");
+
+        if (!members.length) {
+          canvasText(ctx,"등록된 연맹원이 없습니다.",800,tableTop + headerHeight + rowHeight / 2,'700 17px "Noto Sans KR", Arial, sans-serif',"#6f7885","center");
+        } else {
+          members.forEach(function (member,index) {
+            var stats = roundStats(member);
+            var status = memberStatus(member);
+            var progress = stats.allocated > 0 ? Math.max(0,Math.min(100,stats.settled / stats.allocated * 100)) : 0;
+            var y = tableTop + headerHeight + index * rowHeight;
+            if (status.tone === "complete") { ctx.fillStyle = "rgba(239,68,68,.055)"; ctx.fillRect(57,y,1486,rowHeight); }
+            ctx.strokeStyle = "rgba(255,255,255,.055)";
+            ctx.beginPath(); ctx.moveTo(56,y); ctx.lineTo(1544,y); ctx.stroke();
+            var centerY = y + rowHeight / 2;
+            canvasText(ctx,member.name,80,centerY,'800 17px "Noto Sans KR", Arial, sans-serif',"#f4f7fb","left",280);
+            var statusColor = status.tone === "complete" ? "#fca5a5" : status.tone === "progress" ? "#7dd3fc" : status.tone === "excluded" ? "#c4c7ce" : "#fcd34d";
+            canvasText(ctx,status.label,390,centerY,'700 15px "Noto Sans KR", Arial, sans-serif',statusColor,"left",180);
+            canvasText(ctx,stats.allocated.toLocaleString("ko-KR"),820,centerY,'700 16px "Noto Sans KR", Arial, sans-serif',"#d7dbe1","right");
+            canvasText(ctx,stats.distributed.toLocaleString("ko-KR"),1050,centerY,'800 16px "Noto Sans KR", Arial, sans-serif',"#7dd3fc","right");
+            canvasText(ctx,stats.remaining.toLocaleString("ko-KR"),1280,centerY,'900 17px "Noto Sans KR", Arial, sans-serif',status.tone === "complete" ? "#fca5a5" : "#ffffff","right");
+            canvasRoundRect(ctx,1340,centerY - 5,120,10,5,"rgba(255,255,255,.09)",null);
+            if (progress > 0) canvasRoundRect(ctx,1340,centerY - 5,Math.max(5,120 * progress / 100),10,5,status.tone === "complete" ? "#f87171" : "#38bdf8",null);
+            canvasText(ctx,Math.round(progress) + "%",1518,centerY,'700 14px "Noto Sans KR", Arial, sans-serif',"#87909d","right");
+          });
+        }
+
+        var footerY = height - 42;
+        canvasText(ctx,"군도 세금 분배 장부",56,footerY,'700 14px "Noto Sans KR", Arial, sans-serif',"#525c69");
+        canvasText(ctx,"제작자 갓존슨 · youtube.com/@갓존슨",1544,footerY,'700 14px "Noto Sans KR", Arial, sans-serif',"#525c69","right");
+        document.getElementById("report-count").textContent = "현재 연맹원 " + members.length + "명 · 이미지 " + width.toLocaleString("ko-KR") + " × " + height.toLocaleString("ko-KR") + "px";
+      }
+
+      function saveReportImage() {
+        drawReport();
+        var canvas = document.getElementById("report-canvas");
+        var filename = (state.allianceName || "군도세금").replace(/[\\/:*?"<>|]/g,"_") + "_군도세금_분배현황_" + koreaToday() + ".png";
+        if (canvas.toBlob) {
+          canvas.toBlob(function (blob) {
+            if (!blob) { toast("이미지 파일을 만들지 못했습니다.","error"); return; }
+            downloadBlob(blob,filename);
+            toast("분배 현황 이미지를 저장했습니다.");
+          },"image/png");
+        } else {
+          var link = document.createElement("a");
+          link.href = canvas.toDataURL("image/png");
+          link.download = filename;
+          link.click();
+          toast("분배 현황 이미지를 저장했습니다.");
+        }
+      }
+
+      function sortHeader(label, key, right) {
+        var arrow = sortKey === key ? (sortDirection === "asc" ? " ↑" : " ↓") : " ↕";
+        return '<button class="sort-btn" type="button" data-sort="' + key + '">' + label + '<span aria-hidden="true">' + arrow + "</span></button>";
+      }
+
+      function filteredMembers() {
+        var query = document.getElementById("member-search").value.trim().toLocaleLowerCase("ko-KR");
+        var filter = document.getElementById("status-filter").value;
+        return state.members.filter(function (member) {
+          if (!member.isActive) return false;
+          if (query && !member.name.toLocaleLowerCase("ko-KR").includes(query)) return false;
+          var stats = roundStats(member);
+          if (filter === "excluded") return member.isTaxExcluded;
+          if (filter === "complete") return !member.isTaxExcluded && stats.allocated > 0 && stats.remaining === 0;
+          if (filter === "pending") return !member.isTaxExcluded && stats.remaining > 0;
+          if (filter === "unassigned") return !member.isTaxExcluded && stats.allocated === 0;
+          return true;
+        });
+      }
+
+      function renderOverview() {
+        var members = sortMembers(filteredMembers());
+        var empty = document.getElementById("overview-empty");
+        var table = document.getElementById("overview-table");
+        var mobile = document.getElementById("overview-mobile");
+        if (!members.length) {
+          table.innerHTML = "";
+          mobile.innerHTML = "";
+          var hasMembers = state.members.some(function (member) { return member.isActive; });
+          empty.innerHTML = emptyBlock(hasMembers ? "조건에 맞는 연맹원이 없습니다." : "연맹원을 먼저 추가해주세요.", hasMembers ? "검색어나 상태 필터를 변경해보세요." : "연맹원 관리 탭에서 첫 연맹원을 등록하면 장부를 시작할 수 있습니다.", hasMembers ? "" : '<button class="btn btn-primary" type="button" data-go-members>연맹원 추가하기</button>');
+          return;
+        }
+        empty.innerHTML = "";
+        var rows = members.map(function (member) {
+          var stats = roundStats(member);
+          var progress = stats.allocated > 0 ? Math.max(0,Math.min(100, stats.settled / stats.allocated * 100)) : 0;
+          var complete = memberStatus(member).tone === "complete";
+          return '<tr class="' + (complete ? "complete-row" : "") + '"><td><button class="member-name-btn" type="button" data-detail="' + member.id + '">' + esc(member.name) + '</button></td><td>' + statusBadge(member) + '</td><td class="right">' + '<div class="round-cell">' + stats.incoming.toLocaleString("ko-KR") + '<small>이전 미분배 ' + stats.carry.toLocaleString("ko-KR") + '</small></div></td><td class="right money-sky">' + stats.distributed.toLocaleString("ko-KR") + '</td><td class="right">' + differenceHtml(stats) + '</td><td class="right ' + (complete ? "money-red" : "") + '"><strong>' + stats.remaining.toLocaleString("ko-KR") + '</strong></td><td><div style="display:flex;align-items:center;gap:8px"><div class="progress-track"><div class="progress-bar" style="width:' + progress + '%"></div></div><span style="color:#68717e;font-size:.75rem">' + Math.round(progress) + '%</span></div></td><td><div class="quick-cell"><button class="btn btn-ghost btn-small" type="button" data-allocate-member="' + member.id + '">세금 유입</button><button class="btn btn-ghost btn-small" type="button" data-distribute-member="' + member.id + '" ' + (member.isTaxExcluded || stats.remaining === 0 ? "disabled" : "") + '>주머니 지급</button></div></td></tr>';
+        }).join("");
+        table.innerHTML = '<table><thead><tr><th>' + sortHeader("아이디","name") + '</th><th>' + sortHeader("상태","status") + '</th><th class="right">' + sortHeader("회차 유입 / 이전 미분배","allocated") + '</th><th class="right">' + sortHeader("회차 지급","distributed") + '</th><th class="right">차액</th><th class="right">' + sortHeader("회차 미분배","remaining") + '</th><th>' + sortHeader("진행률","progress") + '</th><th class="right">빠른 작업</th></tr></thead><tbody>' + rows + "</tbody></table>";
+        mobile.innerHTML = members.map(function (member) {
+          var stats = roundStats(member);
+          var progress = stats.allocated > 0 ? Math.max(0,Math.min(100, stats.settled / stats.allocated * 100)) : 0;
+          return '<article class="mobile-member"><div class="mobile-member-head"><button class="member-name-btn" type="button" data-detail="' + member.id + '">' + esc(member.name) + '</button>' + statusBadge(member) + '</div><div class="mobile-money"><div><p>회차 유입</p><strong>' + stats.incoming.toLocaleString("ko-KR") + '</strong></div><div><p>회차 지급</p><strong class="money-sky">' + stats.distributed.toLocaleString("ko-KR") + '</strong></div><div><p>남은 세금</p><strong>' + stats.remaining.toLocaleString("ko-KR") + '</strong></div></div><div class="mobile-difference"><span>이전 미분배 ' + stats.carry.toLocaleString("ko-KR") + ' · 차액</span>' + differenceHtml(stats) + '</div><div class="mobile-progress"><div class="progress-track"><div class="progress-bar" style="width:' + progress + '%"></div></div></div><div class="mobile-actions"><button class="btn btn-outline btn-small" type="button" data-allocate-member="' + member.id + '">세금 유입</button><button class="btn btn-primary btn-small" type="button" data-distribute-member="' + member.id + '" ' + (member.isTaxExcluded || stats.remaining === 0 ? "disabled" : "") + '>주머니 지급</button></div></article>';
+        }).join("");
+      }
+
+      function historyEntries() {
+        var filter = document.getElementById("history-filter").value;
+        var allocations = state.allocations.map(function (entry) { return Object.assign({}, entry, { kind: "allocation", sortAt: entry.allocatedAt + "T00:00:00" }); });
+        var distributions = state.distributions.map(function (entry) { return Object.assign({}, entry, { kind: entry.isAllianceTransfer ? "allianceTransfer" : "distribution", sortAt: entry.distributedAt }); });
+        return allocations.concat(distributions).filter(function (entry) { return filter === "all" || entry.kind === filter; }).sort(function (a,b) { return b.sortAt.localeCompare(a.sortAt); });
+      }
+
+      function renderHistory() {
+        var entries = historyEntries();
+        var node = document.getElementById("history-list");
+        if (!entries.length) {
+          node.innerHTML = emptyBlock("아직 기록이 없습니다.", "세금 유입, 주머니 지급 또는 연맹 자금 귀속을 등록하면 이곳에 표시됩니다.");
+          return;
+        }
+        node.innerHTML = entries.map(function (entry) {
+          var member = memberById(entry.memberId);
+          var name = member ? member.name : (entry.memberName || "삭제된 연맹원");
+          var distribution = entry.kind === "distribution";
+          var allianceTransfer = entry.kind === "allianceTransfer";
+          var meta = distribution ? formatDateTime(entry.distributedAt) + " · 10×" + entry.pouch10 + ", 100×" + entry.pouch100 + ", 1000×" + entry.pouch1000 : allianceTransfer ? formatDateTime(entry.distributedAt) + " · 남은 다이아 연맹 자금 귀속" : entry.allocatedAt + " · 연맹 창고 유입";
+          var amount = distribution || allianceTransfer ? entry.total : entry.amount;
+          var label = distribution ? "보석 주머니 지급" : allianceTransfer ? "연맹 자금 귀속" : "개인 세금 유입";
+          var tone = distribution ? "badge-progress" : allianceTransfer ? "badge-complete" : "badge-waiting";
+          var color = distribution ? "money-sky" : allianceTransfer ? "money-red" : "money-amber";
+          var sign = distribution || allianceTransfer ? "-" : "+";
+          var iconTone = distribution ? "sky" : allianceTransfer ? "rose" : "amber";
+          var actions = allianceTransfer ? '<button class="btn btn-ghost icon-btn" type="button" aria-label="삭제" data-delete-alliance-transfer="' + entry.id + '"><svg><use href="#i-trash"></use></svg></button>' : '<button class="btn btn-ghost icon-btn" type="button" aria-label="수정" data-edit-' + entry.kind + '="' + entry.id + '"><svg><use href="#i-pencil"></use></svg></button><button class="btn btn-ghost icon-btn" type="button" aria-label="삭제" data-delete-' + entry.kind + '="' + entry.id + '"><svg><use href="#i-trash"></use></svg></button>';
+          return '<article class="history-item"><div class="history-main"><div class="history-icon ' + iconTone + '"><svg><use href="#' + (distribution ? "i-gem" : "i-money") + '"></use></svg></div><div class="history-copy"><div class="history-title">' + esc(name) + '<span class="badge ' + tone + '">' + label + '</span></div><div class="history-meta">' + esc(meta) + '</div>' + (entry.note ? '<div class="history-note">' + esc(entry.note) + '</div>' : "") + '</div></div><div class="history-side"><div class="history-amount ' + color + '">' + sign + Number(amount).toLocaleString("ko-KR") + '</div><div class="item-actions">' + actions + '</div></div></article>';
+        }).join("");
+      }
+
+      function renderMembers() {
+        var list = state.members.slice().sort(function (a,b) { if (a.isActive !== b.isActive) return a.isActive ? -1 : 1; return a.name.localeCompare(b.name, "ko-KR", { numeric: true }); });
+        var node = document.getElementById("member-list");
+        if (!list.length) {
+          node.innerHTML = emptyBlock("등록된 연맹원이 없습니다.", "위의 연맹원 추가 버튼으로 첫 인원을 등록해주세요.");
+          return;
+        }
+        node.innerHTML = list.map(function (member) {
+          return '<article class="member-item ' + (!member.isActive ? "inactive" : "") + '"><div class="member-copy"><div class="member-title"><button class="member-name-btn" type="button" data-detail="' + member.id + '">' + esc(member.name) + '</button>' + statusBadge(member) + '</div>' + (member.note ? '<p class="member-note">' + esc(member.note) + '</p>' : "") + '</div><div class="member-actions"><label class="switch-label"><input class="switch-input" type="checkbox" data-toggle-excluded="' + member.id + '" ' + (member.isTaxExcluded ? "checked" : "") + " " + (!member.isActive ? "disabled" : "") + '>세금 미지급</label><button class="btn btn-ghost btn-small" type="button" data-edit-member="' + member.id + '"><svg><use href="#i-pencil"></use></svg>수정</button><button class="btn btn-ghost btn-small" type="button" data-toggle-active="' + member.id + '">' + (member.isActive ? "탈퇴 처리" : "복귀") + "</button></div></article>";
+        }).join("");
+      }
+
+      function renderRankings() {
+        var grid = document.getElementById("ranking-grid");
+        var empty = document.getElementById("ranking-empty");
+        if (!rankings.length) {
+          grid.innerHTML = "";
+          empty.innerHTML = emptyBlock("저장된 랭킹 캡처가 없습니다.", "위에서 날짜와 사진을 선택해 첫 캡처를 저장해주세요.");
+          return;
+        }
+        empty.innerHTML = "";
+        grid.innerHTML = rankings.slice().sort(function (a,b) { return (b.capturedAt + b.createdAt).localeCompare(a.capturedAt + a.createdAt); }).map(function (item) {
+          return '<article class="ranking-card"><button class="ranking-image-btn" type="button" data-view-ranking="' + item.id + '" aria-label="랭킹 이미지 확대"><img src="' + item.dataUrl + '" alt="' + esc(item.name) + '" loading="lazy"></button><div class="ranking-info"><div class="ranking-date">' + esc(item.capturedAt) + '</div><div class="ranking-name" title="' + esc(item.name) + '">' + esc(item.name) + '</div><p class="ranking-note">' + esc(item.note || "메모 없음") + '</p><div class="ranking-actions"><button class="btn btn-ghost btn-small" type="button" data-download-ranking="' + item.id + '"><svg><use href="#i-download"></use></svg>받기</button><button class="btn btn-ghost btn-small" type="button" data-delete-ranking="' + item.id + '"><svg><use href="#i-trash"></use></svg>삭제</button></div></div></article>';
+        }).join("");
+      }
+
+      function renderAll() {
+        renderHeaderAndSummary();
+        renderOverview();
+        renderHistory();
+        renderMembers();
+        renderRankings();
+        drawReport();
+      }
+
+      function setTab(name) {
+        activeTab = name;
+        document.querySelectorAll(".tab-btn").forEach(function (button) { button.classList.toggle("active", button.dataset.tab === name); });
+        document.querySelectorAll(".tab-panel").forEach(function (panel) { panel.classList.toggle("hidden", panel.id !== "panel-" + name); });
+        document.getElementById("quick-actions").classList.toggle("hidden", name === "rankings" || name === "manual" || name === "output");
+        if (name === "output") drawReport();
+      }
+
+      function eligibleMembers(currentId) {
+        return state.members.filter(function (member) { return (member.isActive && !member.isTaxExcluded) || member.id === currentId; }).sort(function (a,b) { return a.name.localeCompare(b.name, "ko-KR", { numeric: true }); });
+      }
+
+      function fillMemberSelect(select, currentId, placeholder) {
+        var options = eligibleMembers(currentId);
+        select.innerHTML = '<option value="">' + (options.length ? esc(placeholder) : "먼저 연맹원을 추가해주세요") + "</option>" + options.map(function (member) { return '<option value="' + member.id + '">' + esc(member.name) + " · 남음 " + memberStats(member).remaining.toLocaleString("ko-KR") + "</option>"; }).join("");
+      }
+
+      function openMember(id) {
+        var member = id ? memberById(id) : null;
+        document.getElementById("member-dialog-title").textContent = member ? "연맹원 정보 수정" : "연맹원 추가";
+        document.getElementById("member-id").value = member ? member.id : "";
+        document.getElementById("member-name").value = member ? member.name : "";
+        document.getElementById("member-note").value = member ? member.note : "";
+        document.getElementById("member-excluded").checked = member ? member.isTaxExcluded : false;
+        document.getElementById("member-dialog").showModal();
+        setTimeout(function () { document.getElementById("member-name").focus(); }, 0);
+      }
+
+      function openAllocation(id, memberId) {
+        var entry = id ? state.allocations.find(function (item) { return item.id === id; }) : null;
+        var selectedId = entry ? entry.memberId : (memberId || "");
+        document.getElementById("allocation-title").textContent = entry ? "개인 군도 세금 유입 수정" : "개인 군도 세금 유입 등록";
+        document.getElementById("allocation-id").value = entry ? entry.id : "";
+        fillMemberSelect(document.getElementById("allocation-member"), selectedId, "연맹원 선택");
+        document.getElementById("allocation-member").value = selectedId;
+        document.getElementById("allocation-amount").value = entry ? entry.amount : "";
+        document.getElementById("allocation-date").value = entry ? entry.allocatedAt : koreaToday();
+        document.getElementById("allocation-note").value = entry ? entry.note : "";
+        document.getElementById("allocation-dialog").showModal();
+      }
+
+      function pouchUsage(memberId, date, excludeId) {
+        return state.distributions.filter(function (entry) { return entry.memberId === memberId && entry.distributionDate === date && entry.id !== excludeId; }).reduce(function (sum, entry) {
+          POUCHES.forEach(function (pouch) { sum[pouch.key] += Number(entry[pouch.key] || 0); });
+          return sum;
+        }, { pouch10: 0, pouch100: 0, pouch1000: 0 });
+      }
+
+      function buildPouches() {
+        document.getElementById("pouch-stack").innerHTML = POUCHES.slice().reverse().map(function (pouch) {
+          return '<section class="pouch-card" data-pouch-card="' + pouch.key + '"><div class="pouch-top"><div><div class="pouch-title">' + pouch.label + '</div><div class="pouch-meta" id="' + pouch.key + '-meta">하루 최대 ' + pouch.limit + '개</div></div><div class="stepper"><button class="btn btn-outline icon-btn" type="button" data-step="' + pouch.key + '" data-delta="-1" aria-label="한 개 줄이기"><svg><use href="#i-minus"></use></svg></button><input class="field pouch-input" id="' + pouch.key + '" inputmode="numeric" pattern="[0-9]*" value="0" aria-label="' + pouch.label + ' 수량"><button class="btn btn-primary icon-btn" type="button" data-step="' + pouch.key + '" data-delta="1" aria-label="한 개 늘리기"><svg><use href="#i-plus"></use></svg></button></div></div><div class="quick-counts" id="' + pouch.key + '-quick"></div></section>';
+        }).join("");
+      }
+
+      function openDistribution(id, memberId) {
+        var entry = id ? state.distributions.find(function (item) { return item.id === id; }) : null;
+        var selectedId = entry ? entry.memberId : (memberId || "");
+        document.getElementById("distribution-title").textContent = entry ? "보석 주머니 지급 기록 수정" : "보석 주머니 지급 기록";
+        document.getElementById("distribution-id").value = entry ? entry.id : "";
+        fillMemberSelect(document.getElementById("distribution-member"), selectedId, "연맹원 선택");
+        document.getElementById("distribution-member").value = selectedId;
+        document.getElementById("distribution-at").value = entry ? isoToKoreaInput(entry.distributedAt) : koreaNowInput();
+        POUCHES.forEach(function (pouch) { document.getElementById(pouch.key).value = entry ? entry[pouch.key] : 0; });
+        document.getElementById("distribution-note").value = entry ? entry.note : "";
+        refreshDistribution();
+        document.getElementById("distribution-dialog").showModal();
+      }
+
+      function pouchPlan(amount, usage) {
+        var left = Math.max(0, Math.floor(amount)), plan = {pouch1000:0,pouch100:0,pouch10:0,total:0};
+        POUCHES.slice().reverse().forEach(function(pouch){
+          var available = Math.max(0,pouch.limit-(usage[pouch.key]||0));
+          plan[pouch.key] = Math.min(available,Math.floor(left/pouch.value));
+          left -= plan[pouch.key]*pouch.value;
+          plan.total += plan[pouch.key]*pouch.value;
+        });
+        plan.remaining=left;
+        plan.smallRemainder=left%10;
+        plan.deferred=left-plan.smallRemainder;
+        return plan;
+      }
+
+      function refreshDistribution() {
+        var id = document.getElementById("distribution-id").value;
+        var memberId = document.getElementById("distribution-member").value;
+        var member = memberById(memberId);
+        var at = document.getElementById("distribution-at").value;
+        var date = at ? at.slice(0,10) : "";
+        var usage = pouchUsage(memberId, date, id);
+        var original = id ? state.distributions.find(function (entry) { return entry.id === id; }) : null;
+        var spendable = member ? memberStats(member).remaining + (original && original.memberId === memberId ? original.total : 0) : 0;
+        var allowed = Boolean(member && !member.isTaxExcluded && at);
+        var plan = pouchPlan(allowed ? spendable : 0,usage);
+        document.getElementById("purchase-date").textContent = member ? member.name + " · " + (date || "날짜 선택 필요") + " 지급 기준 · 당일 이미 지급한 수량 제외" : "분배할 연맹원을 선택하면 필요한 수량을 안내합니다.";
+        document.getElementById("purchase-counts").innerHTML = POUCHES.slice().reverse().map(function(pouch){return '<div class="purchase-count"><span>'+pouch.value.toLocaleString("ko-KR")+' 다이아</span><strong>'+plan[pouch.key]+'개</strong></div>';}).join("");
+        document.getElementById("purchase-total").textContent = "추천 구입 합계 · 이번 지급 가능액 " + diamonds(plan.total);
+        var notes=[];
+        if(member && member.isTaxExcluded) notes.push("세금 미지급 인원입니다. 연맹원 관리에서 설정을 확인하세요.");
+        else if(allowed) {
+          if(plan.deferred) notes.push("당일 지급 한도로 남는 " + diamonds(plan.deferred) + "은 다음 날 이후 분배하세요.");
+          if(plan.smallRemainder) notes.push("10다이아 미만 잔액 " + diamonds(plan.smallRemainder) + "은 주머니로 지급할 수 없습니다. 잔액으로 유지하거나 분배 완료 시 연맹 귀속할 수 있습니다.");
+          if(!plan.remaining) notes.push(spendable ? "추천 수량을 지급하면 남은 세금이 모두 분배됩니다." : "남은 분배 금액이 없습니다.");
+        }
+        document.getElementById("purchase-remainder").textContent=notes.join(" ");
+        document.getElementById("apply-pouch-plan").disabled=!allowed || plan.total<1;
+        var total=0;
+        POUCHES.forEach(function(pouch){
+          var input=document.getElementById(pouch.key), available=Math.max(0,pouch.limit-usage[pouch.key]);
+          input.value=Math.max(0,Math.min(available,Number(String(input.value).replace(/[^0-9]/g,""))||0));
+          input.max=available;
+          total+=Number(input.value)*pouch.value;
+        });
+        POUCHES.forEach(function(pouch){
+          var value=Number(document.getElementById(pouch.key).value), available=Math.max(0,pouch.limit-usage[pouch.key]);
+          var budget=Math.max(0,spendable-(total-value*pouch.value));
+          var maxCount=allowed ? Math.min(available,Math.floor(budget/pouch.value)) : 0;
+          document.getElementById(pouch.key+"-meta").textContent="하루 최대 "+pouch.limit+"개 · 이미 지급 "+usage[pouch.key]+"개 · 한도 잔여 "+available+"개";
+          var quick=document.getElementById(pouch.key+"-quick"); quick.classList.add("two");
+          quick.innerHTML=[0,maxCount].map(function(count,index){return '<button class="count-btn '+(value===count?'selected':'')+'" type="button" data-count-key="'+pouch.key+'" data-count="'+count+'">'+(index ? '금액에 맞춘 최대 '+count+'개' : '0개')+'</button>';}).join("");
+        });
+        document.getElementById("dist-before").textContent=diamonds(spendable);
+        document.getElementById("dist-total").textContent=diamonds(total);
+        document.getElementById("dist-total").className=total>spendable ? "money-red" : "money-sky";
+        var error=document.getElementById("dist-error"), message=member && total>spendable ? "남은 세금보다 많은 주머니를 지급할 수 없습니다." : "";
+        error.textContent=message; error.classList.toggle("hidden",!message);
+        document.getElementById("distribution-submit").disabled=!allowed || total<1 || total>spendable;
+        var transferAmount=Math.max(0,spendable-total), completeButton=document.getElementById("distribution-complete");
+        completeButton.disabled=Boolean(id) || !allowed || total>spendable || transferAmount<1;
+        completeButton.textContent=transferAmount>0 ? "분배 완료 (잔액 "+transferAmount.toLocaleString("ko-KR")+" 귀속)" : "분배 완료 (잔액 연맹 귀속)";
+        return {total:total,spendable:spendable,transferAmount:transferAmount,plan:plan,allowed:allowed};
+      }
+
+      function openDetail(id) {
+        var member = memberById(id);
+        if (!member) return;
+        detailMemberId = id;
+        var stats = memberStats(member);
+        document.getElementById("detail-title").textContent = member.name;
+        document.getElementById("detail-subtitle").textContent = "전체 누적 획득 " + diamonds(stats.allocated) + " · 지급 " + diamonds(stats.distributed) + (stats.allianceFund ? " · 연맹 귀속 " + diamonds(stats.allianceFund) : "") + " · 남음 " + diamonds(stats.remaining);
+        var allocations = state.allocations.filter(function (entry) { return entry.memberId === id; }).sort(function (a,b) { return b.allocatedAt.localeCompare(a.allocatedAt); });
+        var distributions = state.distributions.filter(function (entry) { return entry.memberId === id; }).sort(function (a,b) { return b.distributedAt.localeCompare(a.distributedAt); });
+        var allocationHtml = allocations.length ? allocations.map(function (entry) { return '<div class="detail-record"><span>' + esc(entry.allocatedAt) + (entry.note ? " · " + esc(entry.note) : "") + '</span><strong class="money-amber">+' + Number(entry.amount).toLocaleString("ko-KR") + "</strong></div>"; }).join("") : '<p style="color:#636c79;font-size:.8rem">기록 없음</p>';
+        var distributionHtml = distributions.length ? distributions.map(function (entry) { return entry.isAllianceTransfer ? '<div class="detail-record"><span>' + esc(formatDateTime(entry.distributedAt)) + ' · 남은 다이아 연맹 자금 귀속</span><strong class="money-red">-' + Number(entry.total).toLocaleString("ko-KR") + "</strong></div>" : '<div class="detail-record"><span>' + esc(formatDateTime(entry.distributedAt)) + " · 10×" + entry.pouch10 + ", 100×" + entry.pouch100 + ", 1000×" + entry.pouch1000 + '</span><strong class="money-sky">-' + Number(entry.total).toLocaleString("ko-KR") + "</strong></div>"; }).join("") : '<p style="color:#636c79;font-size:.8rem">기록 없음</p>';
+        document.getElementById("detail-body").innerHTML = '<div class="distribution-summary"><div><p>전체 누적 획득 세금</p><strong class="money-amber">' + diamonds(stats.allocated) + '</strong></div><div class="right"><p>남은 세금</p><strong class="' + (stats.remaining === 0 && stats.allocated ? "money-red" : "") + '">' + diamonds(stats.remaining) + '</strong></div></div><section class="detail-section"><h3>세금 유입 기록</h3>' + allocationHtml + '</section><section class="detail-section"><h3>주머니 지급·연맹 귀속 기록</h3>' + distributionHtml + "</section>";
+        document.getElementById("detail-distribute").disabled = member.isTaxExcluded || stats.remaining === 0;
+        document.getElementById("detail-dialog").showModal();
+      }
+
+      function askConfirm(title, desc, action, actionLabel) {
+        confirmAction = action;
+        document.getElementById("confirm-title").textContent = title;
+        document.getElementById("confirm-desc").textContent = desc;
+        document.getElementById("confirm-ok").textContent = actionLabel || "삭제";
+        document.getElementById("confirm-dialog").showModal();
+      }
+
+      function downloadBlob(blob, filename) {
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+      }
+
+      function exportCsv() {
+        var rows = [["구분","일시","아이디","금액","보석주머니10","보석주머니100","보석주머니1000","메모"]];
+        historyEntries().forEach(function (entry) {
+          var member = memberById(entry.memberId);
+          var name = member ? member.name : (entry.memberName || "삭제된 연맹원");
+          if (entry.kind === "distribution") rows.push(["분배",formatDateTime(entry.distributedAt),name,String(entry.total),String(entry.pouch10),String(entry.pouch100),String(entry.pouch1000),entry.note || ""]);
+          else if (entry.kind === "allianceTransfer") rows.push(["연맹 자금 귀속",formatDateTime(entry.distributedAt),name,String(entry.total),"","","",entry.note || ""]);
+          else rows.push(["세금 유입",entry.allocatedAt,name,String(entry.amount),"","","",entry.note || ""]);
+        });
+        var csv = rows.map(function (row) { return row.map(function (cell) { return '"' + String(cell).replace(/"/g,'""') + '"'; }).join(","); }).join("\n");
+        downloadBlob(new Blob(["\uFEFF",csv], { type: "text/csv;charset=utf-8" }), (state.allianceName || "군도세금").replace(/[\\/:*?"<>|]/g,"_") + "_세금분배장부_" + koreaToday() + ".csv");
+      }
+
+      function openRankDb() {
+        return new Promise(function (resolve,reject) {
+          var request = indexedDB.open(DB_NAME,1);
+          request.onupgradeneeded = function () {
+            if (!request.result.objectStoreNames.contains("rankings")) request.result.createObjectStore("rankings",{ keyPath:"id" });
+          };
+          request.onsuccess = function () { resolve(request.result); };
+          request.onerror = function () { reject(request.error); };
+        });
+      }
+
+      async function getRankings() {
+        var db = await openRankDb();
+        return new Promise(function (resolve,reject) {
+          var request = db.transaction("rankings","readonly").objectStore("rankings").getAll();
+          request.onsuccess = function () { resolve(request.result || []); };
+          request.onerror = function () { reject(request.error); };
+        });
+      }
+
+      async function putRanking(item) {
+        var db = await openRankDb();
+        return new Promise(function (resolve,reject) {
+          var request = db.transaction("rankings","readwrite").objectStore("rankings").put(item);
+          request.onsuccess = function () { resolve(); };
+          request.onerror = function () { reject(request.error); };
+        });
+      }
+
+      async function removeRanking(id) {
+        var db = await openRankDb();
+        return new Promise(function (resolve,reject) {
+          var request = db.transaction("rankings","readwrite").objectStore("rankings").delete(id);
+          request.onsuccess = function () { resolve(); };
+          request.onerror = function () { reject(request.error); };
+        });
+      }
+
+      async function clearRankings() {
+        var db = await openRankDb();
+        return new Promise(function (resolve,reject) {
+          var request = db.transaction("rankings","readwrite").objectStore("rankings").clear();
+          request.onsuccess = function () { resolve(); };
+          request.onerror = function () { reject(request.error); };
+        });
+      }
+
+      function imageData(file) {
+        return new Promise(function (resolve,reject) {
+          var reader = new FileReader();
+          reader.onerror = function () { reject(reader.error); };
+          reader.onload = function () {
+            var img = new Image();
+            img.onerror = function () { reject(new Error("이미지를 읽을 수 없습니다.")); };
+            img.onload = function () {
+              var max = 2200;
+              var scale = Math.min(1,max / Math.max(img.width,img.height));
+              var canvas = document.createElement("canvas");
+              canvas.width = Math.max(1,Math.round(img.width * scale));
+              canvas.height = Math.max(1,Math.round(img.height * scale));
+              var context = canvas.getContext("2d");
+              context.drawImage(img,0,0,canvas.width,canvas.height);
+              var mime = file.type === "image/png" && file.size < 2600000 ? "image/png" : "image/webp";
+              resolve(canvas.toDataURL(mime,mime === "image/png" ? undefined : .9));
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function exportBackup() {
+        try {
+          rankings = await getRankings();
+          var payload = { app: "갓존슨 군도 세금 분배 장부", exportedAt: new Date().toISOString(), version: 2, ledger: state, rankings: rankings };
+          downloadBlob(new Blob([JSON.stringify(payload,null,2)], { type: "application/json;charset=utf-8" }), (state.allianceName || "군도세금").replace(/[\\/:*?"<>|]/g,"_") + "_군도세금_전체백업_" + koreaToday() + ".json");
+          toast("전체 백업 파일을 저장했습니다.");
+        } catch (error) { toast("백업 파일을 만들지 못했습니다.", "error"); }
+      }
+
+      async function importBackup(file) {
+        try {
+          var payload = JSON.parse(await file.text());
+          if (!payload || !payload.ledger || !Array.isArray(payload.ledger.members) || !Array.isArray(payload.ledger.allocations) || !Array.isArray(payload.ledger.distributions)) throw new Error("올바른 백업 파일이 아닙니다.");
+          await clearRankings();
+          var importedRankings = Array.isArray(payload.rankings) ? payload.rankings : [];
+          for (var i=0;i<importedRankings.length;i++) await putRanking(importedRankings[i]);
+          state = payload.ledger;
+          rankings = importedRankings;
+          saveState();
+          renderAll();
+          toast("백업 내용을 복원했습니다.");
+        } catch (error) { toast(error.message || "백업 파일을 불러오지 못했습니다.", "error"); }
+      }
+
+      document.querySelectorAll(".tab-btn").forEach(function (button) { button.addEventListener("click",function () { setTab(button.dataset.tab); }); });
+      document.querySelectorAll("[data-close]").forEach(function (button) { button.addEventListener("click",function () { document.getElementById(button.dataset.close).close(); }); });
+      document.getElementById("member-search").addEventListener("input",renderOverview);
+      document.getElementById("status-filter").addEventListener("change",renderOverview);
+      document.getElementById("history-filter").addEventListener("change",renderHistory);
+      document.getElementById("export-csv").addEventListener("click",exportCsv);
+      document.getElementById("edit-alliance-btn").addEventListener("click",function () {
+        document.getElementById("alliance-input").value = state.allianceName;
+        document.getElementById("alliance-dialog").showModal();
+      });
+      document.getElementById("alliance-form").addEventListener("submit",function (event) {
+        event.preventDefault();
+        var name = document.getElementById("alliance-input").value.trim();
+        if (!name) return;
+        state.allianceName = name;
+        saveState(); renderHeaderAndSummary();
+        document.getElementById("alliance-dialog").close();
+        toast("연맹 이름을 변경했습니다.");
+      });
+      document.getElementById("add-member").addEventListener("click",function () { openMember(); });
+      document.getElementById("open-allocation").addEventListener("click",function () { openAllocation(); });
+      document.getElementById("open-distribution").addEventListener("click",function () { openDistribution(); });
+
+      document.getElementById("member-form").addEventListener("submit",function (event) {
+        event.preventDefault();
+        var id = document.getElementById("member-id").value;
+        var name = document.getElementById("member-name").value.trim();
+        var duplicate = state.members.some(function (member) { return member.name.toLocaleLowerCase("ko-KR") === name.toLocaleLowerCase("ko-KR") && member.id !== id; });
+        if (duplicate) { toast("같은 아이디가 이미 등록되어 있습니다.", "error"); return; }
+        if (id) {
+          var member = memberById(id);
+          member.name = name; member.note = document.getElementById("member-note").value.trim(); member.isTaxExcluded = document.getElementById("member-excluded").checked;
+        } else {
+          state.members.push({ id: uid("member"), name: name, note: document.getElementById("member-note").value.trim(), isTaxExcluded: document.getElementById("member-excluded").checked, isActive: true, joinedAt: koreaToday(), leftAt: null });
+        }
+        saveState(); renderAll(); document.getElementById("member-dialog").close(); toast(id ? "연맹원 정보를 수정했습니다." : name + "님을 추가했습니다.");
+      });
+
+      document.getElementById("allocation-amount").addEventListener("input",function (event) { event.target.value = event.target.value.replace(/[^0-9]/g,""); });
+      document.getElementById("allocation-form").addEventListener("submit",function (event) {
+        event.preventDefault();
+        var id = document.getElementById("allocation-id").value;
+        var memberId = document.getElementById("allocation-member").value;
+        var amount = Number(document.getElementById("allocation-amount").value);
+        if (!memberId || amount < 1) { toast("연맹원과 세금 금액을 확인해주세요.", "error"); return; }
+        var entry = id ? state.allocations.find(function (item) { return item.id === id; }) : null;
+        var payload = { id: id || uid("allocation"), memberId: memberId, amount: amount, allocatedAt: document.getElementById("allocation-date").value, note: document.getElementById("allocation-note").value.trim(), createdAt: entry ? entry.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() };
+        if (entry) state.allocations[state.allocations.indexOf(entry)] = payload; else state.allocations.push(payload);
+        selectedRound = roundStart(payload.allocatedAt); saveState(); renderAll(); document.getElementById("allocation-dialog").close(); toast(id ? "세금 유입 기록을 수정했습니다." : diamonds(amount) + "의 세금 유입을 기록했습니다.");
+      });
+
+      document.getElementById("apply-pouch-plan").addEventListener("click",function(){
+        var check=refreshDistribution(); if(!check.allowed || check.plan.total<1) return;
+        POUCHES.forEach(function(pouch){document.getElementById(pouch.key).value=check.plan[pouch.key];});
+        refreshDistribution(); toast("추천 수량을 입력했습니다. 실제 지급 후 주머니 지급 저장을 눌러주세요.");
+      });
+      document.getElementById("distribution-member").addEventListener("change",refreshDistribution);
+      document.getElementById("distribution-at").addEventListener("change",refreshDistribution);
+      document.getElementById("pouch-stack").addEventListener("input",function (event) { if (event.target.classList.contains("pouch-input")) { event.target.value = event.target.value.replace(/[^0-9]/g,""); refreshDistribution(); } });
+      document.getElementById("pouch-stack").addEventListener("click",function (event) {
+        var step = event.target.closest("[data-step]");
+        var count = event.target.closest("[data-count-key]");
+        if (step) {
+          var input = document.getElementById(step.dataset.step);
+          input.value = Math.max(0,(Number(input.value)||0) + Number(step.dataset.delta));
+          refreshDistribution();
+        }
+        if (count) { document.getElementById(count.dataset.countKey).value = count.dataset.count; refreshDistribution(); }
+      });
+      document.getElementById("distribution-complete").addEventListener("click",function () {
+        var check = refreshDistribution();
+        var memberId = document.getElementById("distribution-member").value;
+        var member = memberById(memberId);
+        var at = document.getElementById("distribution-at").value;
+        if (!check.allowed || !member || !at || check.transferAmount < 1 || check.total > check.spendable || document.getElementById("distribution-id").value) { toast("연맹원과 남은 세금을 확인해주세요.", "error"); return; }
+        var note = document.getElementById("distribution-note").value.trim();
+        var description = (check.total > 0 ? "선택한 주머니 " + diamonds(check.total) + "을 지급 기록으로 저장하고, " : "") + "남는 " + diamonds(check.transferAmount) + "을 연맹 자금으로 귀속합니다. 처리 후 해당 인원은 분배 완료 상태가 됩니다.";
+        askConfirm(member.name + "님의 분배를 완료할까요?",description,function () {
+          var now = new Date().toISOString();
+          if (check.total > 0) {
+            state.distributions.push({ id: uid("distribution"), memberId: memberId, distributedAt: toIso(at), distributionDate: at.slice(0,10), pouch10: Number(document.getElementById("pouch10").value)||0, pouch100: Number(document.getElementById("pouch100").value)||0, pouch1000: Number(document.getElementById("pouch1000").value)||0, total: check.total, note: note, createdAt: now, updatedAt: now });
+          }
+          state.distributions.push({ id: uid("alliance-transfer"), memberId: memberId, distributedAt: toIso(at), distributionDate: at.slice(0,10), pouch10: 0, pouch100: 0, pouch1000: 0, total: check.transferAmount, isAllianceTransfer: true, note: note, createdAt: now, updatedAt: now });
+          saveState(); renderAll(); document.getElementById("distribution-dialog").close(); toast(diamonds(check.transferAmount) + "을 연맹 자금으로 귀속하고 분배를 완료했습니다.");
+        },"귀속 후 완료");
+      });
+      document.getElementById("distribution-form").addEventListener("submit",function (event) {
+        event.preventDefault();
+        var check = refreshDistribution();
+        var id = document.getElementById("distribution-id").value;
+        var memberId = document.getElementById("distribution-member").value;
+        var at = document.getElementById("distribution-at").value;
+        if (!check.allowed || !memberId || !at || check.total < 1 || check.total > check.spendable) { toast("주머니 수량과 남은 세금을 확인해주세요.", "error"); return; }
+        var entry = id ? state.distributions.find(function (item) { return item.id === id; }) : null;
+        var payload = { id: id || uid("distribution"), memberId: memberId, distributedAt: toIso(at), distributionDate: at.slice(0,10), pouch10: Number(document.getElementById("pouch10").value)||0, pouch100: Number(document.getElementById("pouch100").value)||0, pouch1000: Number(document.getElementById("pouch1000").value)||0, total: check.total, note: document.getElementById("distribution-note").value.trim(), createdAt: entry ? entry.createdAt : new Date().toISOString(), updatedAt: new Date().toISOString() };
+        if (entry) state.distributions[state.distributions.indexOf(entry)] = payload; else state.distributions.push(payload);
+        saveState(); renderAll(); document.getElementById("distribution-dialog").close(); toast(id ? "주머니 지급 기록을 수정했습니다." : diamonds(check.total) + "의 주머니 지급을 기록했습니다.");
+      });
+
+      document.body.addEventListener("click",function (event) {
+        var target;
+        target = event.target.closest("[data-go-members]"); if (target) { setTab("members"); openMember(); return; }
+        target = event.target.closest("[data-sort]"); if (target) { if (sortKey === target.dataset.sort) sortDirection = sortDirection === "asc" ? "desc" : "asc"; else { sortKey = target.dataset.sort; sortDirection = sortKey === "name" || sortKey === "status" ? "asc" : "desc"; } renderOverview(); return; }
+        target = event.target.closest("[data-detail]"); if (target) { openDetail(target.dataset.detail); return; }
+        target = event.target.closest("[data-allocate-member]"); if (target) { openAllocation(null,target.dataset.allocateMember); return; }
+        target = event.target.closest("[data-distribute-member]"); if (target) { openDistribution(null,target.dataset.distributeMember); return; }
+        target = event.target.closest("[data-edit-member]"); if (target) { openMember(target.dataset.editMember); return; }
+        target = event.target.closest("[data-toggle-active]"); if (target) {
+          var activeMember = memberById(target.dataset.toggleActive);
+          var activate = !activeMember.isActive;
+          askConfirm(activate ? "연맹원으로 복귀할까요?" : "탈퇴 처리할까요?", activate ? "기존 장부 기록을 유지한 채 현재 연맹원으로 복귀합니다." : "기존 장부 기록은 삭제되지 않습니다.",function () { activeMember.isActive = activate; activeMember.leftAt = activate ? null : koreaToday(); saveState(); renderAll(); toast(activate ? activeMember.name + "님을 복귀 처리했습니다." : activeMember.name + "님을 탈퇴 처리했습니다."); },activate ? "복귀" : "탈퇴 처리");
+          return;
+        }
+        target = event.target.closest("[data-edit-allocation]"); if (target) { openAllocation(target.dataset.editAllocation); return; }
+        target = event.target.closest("[data-edit-distribution]"); if (target) { openDistribution(target.dataset.editDistribution); return; }
+        target = event.target.closest("[data-delete-allocation]"); if (target) {
+          var allocationId = target.dataset.deleteAllocation;
+          askConfirm("세금 유입 기록을 삭제할까요?","삭제하면 합계와 남은 금액이 즉시 다시 계산됩니다.",function () { state.allocations = state.allocations.filter(function (entry) { return entry.id !== allocationId; }); saveState(); renderAll(); toast("세금 유입 기록을 삭제했습니다."); });
+          return;
+        }
+        target = event.target.closest("[data-delete-distribution]"); if (target) {
+          var distributionId = target.dataset.deleteDistribution;
+          askConfirm("주머니 지급 기록을 삭제할까요?","삭제하면 합계와 남은 금액이 즉시 다시 계산됩니다.",function () { state.distributions = state.distributions.filter(function (entry) { return entry.id !== distributionId; }); saveState(); renderAll(); toast("주머니 지급 기록을 삭제했습니다."); });
+          return;
+        }
+        target = event.target.closest("[data-delete-alliance-transfer]"); if (target) {
+          var allianceTransferId = target.dataset.deleteAllianceTransfer;
+          askConfirm("연맹 자금 귀속 기록을 삭제할까요?","삭제하면 귀속 처리한 금액이 해당 연맹원의 남은 세금으로 다시 계산됩니다.",function () { state.distributions = state.distributions.filter(function (entry) { return entry.id !== allianceTransferId; }); saveState(); renderAll(); toast("연맹 자금 귀속 기록을 삭제했습니다."); });
+          return;
+        }
+        target = event.target.closest("[data-view-ranking]"); if (target) {
+          var viewed = rankings.find(function (item) { return item.id === target.dataset.viewRanking; });
+          if (viewed) { document.getElementById("viewer-title").textContent = viewed.name; document.getElementById("viewer-subtitle").textContent = viewed.capturedAt + (viewed.note ? " · " + viewed.note : ""); document.getElementById("viewer-image").src = viewed.dataUrl; document.getElementById("viewer-dialog").showModal(); }
+          return;
+        }
+        target = event.target.closest("[data-download-ranking]"); if (target) {
+          var downloaded = rankings.find(function (item) { return item.id === target.dataset.downloadRanking; });
+          if (downloaded) { var link = document.createElement("a"); link.href = downloaded.dataUrl; link.download = downloaded.name; link.click(); }
+          return;
+        }
+        target = event.target.closest("[data-delete-ranking]"); if (target) {
+          var rankingId = target.dataset.deleteRanking;
+          askConfirm("랭킹 캡처를 삭제할까요?","삭제한 사진은 복구할 수 없습니다.",async function () { await removeRanking(rankingId); rankings = rankings.filter(function (item) { return item.id !== rankingId; }); renderRankings(); toast("랭킹 캡처를 삭제했습니다."); });
+        }
+      });
+
+      document.getElementById("member-list").addEventListener("change",function (event) {
+        if (!event.target.matches("[data-toggle-excluded]")) return;
+        var member = memberById(event.target.dataset.toggleExcluded);
+        member.isTaxExcluded = event.target.checked;
+        saveState(); renderAll(); toast(event.target.checked ? member.name + "님을 세금 미지급으로 분류했습니다." : member.name + "님을 분배 대상에 포함했습니다.");
+      });
+
+      document.getElementById("detail-distribute").addEventListener("click",function () { document.getElementById("detail-dialog").close(); openDistribution(null,detailMemberId); });
+      document.getElementById("confirm-cancel").addEventListener("click",function () { confirmAction = null; document.getElementById("confirm-dialog").close(); });
+      document.getElementById("confirm-ok").addEventListener("click",async function () {
+        var action = confirmAction; confirmAction = null; document.getElementById("confirm-dialog").close();
+        try { if (action) await action(); } catch (error) { toast(error.message || "작업을 완료하지 못했습니다.","error"); }
+      });
+
+      document.getElementById("ranking-date").value = koreaToday();
+      document.getElementById("ranking-form").addEventListener("submit",function (event) { event.preventDefault(); });
+      document.getElementById("ranking-files").addEventListener("change",async function (event) {
+        var files = Array.from(event.target.files || []);
+        if (!files.length) return;
+        var date = document.getElementById("ranking-date").value || koreaToday();
+        var note = document.getElementById("ranking-note").value.trim();
+        var label = document.querySelector(".upload-field span");
+        var original = label.textContent;
+        try {
+          label.textContent = "사진 저장 중...";
+          for (var i=0;i<files.length;i++) {
+            if (!files[i].type.startsWith("image/")) continue;
+            var dataUrl = await imageData(files[i]);
+            await putRanking({ id: uid("ranking"), name: files[i].name, capturedAt: date, note: note, dataUrl: dataUrl, createdAt: new Date().toISOString() });
+          }
+          rankings = await getRankings();
+          renderRankings();
+          event.target.value = "";
+          toast(files.length + "장의 랭킹 사진을 저장했습니다.");
+        } catch (error) { toast(error.message || "사진을 저장하지 못했습니다. 브라우저 저장 공간을 확인해주세요.","error"); }
+        finally { label.textContent = original; }
+      });
+
+      document.getElementById("export-backup").addEventListener("click",exportBackup);
+      document.getElementById("refresh-report").addEventListener("click",function () { drawReport(); toast("최신 장부 내용을 이미지에 반영했습니다."); });
+      document.getElementById("save-report").addEventListener("click",saveReportImage);
+      document.getElementById("import-backup").addEventListener("change",function (event) { var file = event.target.files && event.target.files[0]; if (file) { askConfirm("백업 내용을 불러올까요?","현재 장부와 랭킹 사진이 백업 파일의 내용으로 교체됩니다.",function () { return importBackup(file); },"불러오기"); } event.target.value = ""; });
+      document.querySelectorAll("[data-reset-all]").forEach(function (button) {
+        button.addEventListener("click",function () {
+          askConfirm("모든 기록을 초기화할까요?","지금까지 기록된 연맹 이름, 연맹원, 세금 유입, 주머니 지급, 랭킹 사진이 모두 사라집니다. 이 배포용 장부에 저장된 모든 정보를 삭제합니다. 필요한 기록은 먼저 전체 백업을 받아주세요. 이 작업은 되돌릴 수 없습니다.",async function () { await clearRankings();
+            localStorage.removeItem(STORAGE_KEY);
+            state = defaultState(); rankings = []; selectedRound = roundStart(koreaToday());
+            sortKey = "name"; sortDirection = "asc"; detailMemberId = null;
+            document.getElementById("member-search").value = "";
+            document.getElementById("status-filter").value = "all";
+            document.getElementById("history-filter").value = "all";
+            document.querySelectorAll("dialog form").forEach(function(form){form.reset();});
+            document.getElementById("ranking-form").reset();
+            document.getElementById("ranking-date").value = koreaToday();
+            document.getElementById("viewer-image").removeAttribute("src");
+            document.getElementById("detail-body").innerHTML = "";
+            setTab("overview"); renderAll(); toast("모든 기록을 초기화했습니다."); },"모든 기록 삭제");
+        });
+      });
+
+      document.getElementById("round-select").addEventListener("change",function(){ selectedRound=this.value; renderAll(); });
+      document.getElementById("round-today").addEventListener("click",function(){ selectedRound=roundStart(koreaToday()); renderAll(); });
+      buildPouches();
+      getRankings().then(function (items) { rankings = items; renderRankings(); }).catch(function () { toast("랭킹 사진 저장소를 열지 못했습니다.","error"); });
+      renderAll();
+      setTab(activeTab);
+    })();
+  </script>
+</body>
+</html>
